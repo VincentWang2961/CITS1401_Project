@@ -43,10 +43,7 @@ def get_median(data_set: list[float]) -> float:
 
 # Function that take an int data set and return a float number
 def get_average(data_set: list[float]) -> float:
-    sum = 0.0
-    for i in data_set:
-        sum += i
-    ave = sum / len(data_set)
+    ave = sum(data_set) / len(data_set)
     return ave
 
 
@@ -61,6 +58,7 @@ def get_mean_absolute_deviation(data_set: list[float]) -> float:
     return md_num
 
 
+# CAN USE **0.5 INSTEAD
 # Function that get a approximate square root by using Newton's method
 def get_square_root(num: float) -> float:
     # Inilialise guess value
@@ -72,7 +70,7 @@ def get_square_root(num: float) -> float:
     return guess_value
 
 
-# Function
+# Function to get the standard deviation
 def get_standard_deviation(data_set: list[float]) -> float:
     data_ave = get_average(data_set)
     list_len = len(data_set)
@@ -80,8 +78,26 @@ def get_standard_deviation(data_set: list[float]) -> float:
     for i in range(list_len):
         sd_num += (data_ave - data_set[i]) ** 2
     sd_num /= list_len - 1
-    sd_num = get_square_root(sd_num)
+    sd_num = sd_num ** 0.5
     return sd_num
+
+
+# Function that take two lists and return the correlation coeddicient value
+def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
+    # Set the ave values of x and y
+    ave_x, ave_y = get_average(data_set_x), get_average(data_set_y)
+    # Initialise variables of numerator and denumerator
+    numerator = 0
+    denumerator_temp1, denumerator_temp2 = 0, 0
+    list_len = len(data_set_x)
+    # Get values by throughout two lists
+    for i in range(list_len):
+        numerator += (data_set_x[i] - ave_x) * (data_set_y[i] - ave_y)
+        denumerator_temp1 += (data_set_x[i] - ave_x) ** 2
+        denumerator_temp2 += (data_set_y[i] - ave_y) ** 2
+    denumerator = (denumerator_temp1 * denumerator_temp2) ** 0.5
+    cc_num = numerator / denumerator
+    return cc_num
 
 
 # Maybe there is a function that convert a list into an int list needed?
@@ -91,4 +107,6 @@ def get_standard_deviation(data_set: list[float]) -> float:
 #print(get_median([1, 2, 3, 4, 5]))
 #print(get_average(['1', 1, 3, 4]))
 #print(get_mean_absolute_deviation([1, 2, 3, 4, 5]))
-print(get_square_root(6))
+#print(get_square_root(6))
+#print(get_standard_deviation([1, 2, 3, 4, 5]))
+print(get_correlation_coeddicient([1, 4, 6, 7, 1],[2, 5, 7, 8, 1]))
