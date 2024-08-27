@@ -5,29 +5,62 @@ def main(CSVfile: str, TXTfile: str, category: str):
     OP3 = [STD1, STD2, ... , STDN]
     OP4 = Correlation
     '''
-    OP1, OP2, OP3 = [], [], []
+    OP1, OP2, OP3 = ['', ''], [''], ['']
     OP4 = 0.0
+    
+    # Task1
+    OP1[0], OP1[1] = task1(CSVfile, category)
 
+    #Task2
+    
+    # Fianlly return the target values
+    return OP1, OP2, OP3, OP4
+
+
+''' Task Functions'''
+
+
+# Function of task1, to get highest and lowest id
+# To do: task1 note unfinished
+#        need to figure out why the output is not as the expected with highest to be the lowest
+def task1(CSVfile: str, category: str) -> str:
     # Open the file Amazon_products.csv
     # product_id,product_name,category,discounted_price $,actual_price $,discount_percentage %,rating,rating_count
-    with open(CSVfile, "r") as file1:
-        # Skip the first line
-        file1.readline()
+    with open(CSVfile, 'r') as product_file:
+        # Skip the first header line
+        product_file.readline()
         # Initialise values
-        hdiscount = int(file1.readline().rstrip().split(",")[3])
+        hdiscount = 0
+        for line in product_file:
+            row = line.rstrip().split(",")
+            if row[2] == category:
+                hdiscount = int(row[3])
+                break
         ldiscount = hdiscount
         hid, lid = '', ''
         # Get the highest and lowest discount and it's id
-        for line in file1:
+        for line in product_file:
             row = line.rstrip().split(",")
-            if int(row[3]) > hdiscount:
-                hdiscount = int(row[3])
-                hid = row[0]
-            elif int(row[3]) < ldiscount:
-                ldiscount = int(row[3])
-                lid = row[0]
-    return OP1, OP2, OP3, OP4
- 
+            if row[2] == category:
+                if int(row[3]) > hdiscount:
+                    hdiscount = int(row[3])
+                    hid = row[0]
+                elif int(row[3]) < ldiscount:
+                    ldiscount = int(row[3])
+                    lid = row[0]
+    return hid, lid
+
+
+# Function for task2
+def task2(CSVfile: str, category: str):
+    with open(CSVfile, 'r') as product_file:
+        mean = get_average()
+        median = get_median()
+        mean_absolute_deviation = get_mean_absolute_deviation
+    return mean, median, mean_absolute_deviation
+
+
+
 
 ''' Mathmatical Part of the Project'''
 
@@ -65,18 +98,6 @@ def get_mean_absolute_deviation(data_set: list[float]) -> float:
     return md_num
 
 
-# CAN USE **0.5 INSTEAD
-# Function that get a approximate square root by using Newton's method
-def get_square_root(num: float) -> float:
-    # Inilialise guess value
-    guess_value = num / 2
-    # Set the accuracy
-    accuracy = 10 ** -10
-    while abs(guess_value ** 2 - num) > accuracy:
-        guess_value -= (guess_value ** 2 - num) / (2 * guess_value)
-    return guess_value
-
-
 # Function to get the standard deviation
 def get_standard_deviation(data_set: list[float]) -> float:
     data_ave = get_average(data_set)
@@ -110,10 +131,10 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
 # Maybe there is a function that convert a list into an int list needed?
 
 
-'''Temp Testing Part of The Project'''
+''' Temp Testing Part of The Project'''
 
 
-main("/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv", "", "")
+print(main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '', 'Electronics'))
 
 
 # For temp test
