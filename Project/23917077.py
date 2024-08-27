@@ -5,13 +5,14 @@ def main(CSVfile: str, TXTfile: str, category: str):
     OP3 = [STD1, STD2, ... , STDN]
     OP4 = Correlation
     '''
-    OP1, OP2, OP3 = ['', ''], [''], ['']
+    OP1, OP2, OP3 = ['', ''], ['', '', ''], ['']
     OP4 = 0.0
     
     # Task1
     OP1[0], OP1[1] = task1(CSVfile, category)
 
     #Task2
+    OP2[0], OP2[1], OP2[2] = task2(CSVfile, category, 1000)
     
     # Fianlly return the target values
     return OP1, OP2, OP3, OP4
@@ -23,7 +24,7 @@ def main(CSVfile: str, TXTfile: str, category: str):
 # Function of task1, to get highest and lowest id
 # To do: task1 note unfinished
 #        need to figure out why the output is not as the expected with highest to be the lowest
-def task1(CSVfile: str, category: str) -> str:
+def task1(CSVfile: str, category: str) -> list[str]:
     # Open the file Amazon_products.csv
     # product_id,product_name,category,discounted_price $,actual_price $,discount_percentage %,rating,rating_count
     with open(CSVfile, 'r') as product_file:
@@ -52,11 +53,20 @@ def task1(CSVfile: str, category: str) -> str:
 
 
 # Function for task2
-def task2(CSVfile: str, category: str):
+def task2(CSVfile: str, category: str, rating_count: int) -> list[float]:
+    data_set = []
     with open(CSVfile, 'r') as product_file:
-        mean = get_average()
-        median = get_median()
-        mean_absolute_deviation = get_mean_absolute_deviation
+        # Skip the first header line
+        product_file.readline()
+        # Get the needed values as a list
+        for line in product_file:
+            row = line.rstrip().split(",")
+            if row[2] == category and int(row[7]) > rating_count:
+                data_set.append(int(row[4]))
+        # Get the values
+        mean = get_average(data_set)
+        median = get_median(data_set)
+        mean_absolute_deviation = get_mean_absolute_deviation(data_set)
     return mean, median, mean_absolute_deviation
 
 
@@ -134,7 +144,11 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
 ''' Temp Testing Part of The Project'''
 
 
-print(main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '', 'Electronics'))
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '', 'Computers&Accessories')
+print(OP1)
+print(OP2)
+print(OP3)
+print(OP4)
 
 
 # For temp test
