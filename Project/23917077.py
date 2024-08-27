@@ -5,17 +5,13 @@ def main(CSVfile: str, TXTfile: str, category: str):
     OP3 = [STD1, STD2, ... , STDN]
     OP4 = Correlation
     '''
-
     
     # Task1
     OP1 = task1(CSVfile, category)
-
     # Task2
     OP2 = task2(CSVfile, category, 1000)
-    
     # Task3
     OP3 = task3(CSVfile, 3.3, 4.3)
-
     # Task4
     OP4 = task4(CSVfile, TXTfile, category)
 
@@ -27,31 +23,21 @@ def main(CSVfile: str, TXTfile: str, category: str):
 
 
 # Function of task1, to get highest and lowest id
-# To do: task1 note unfinished
-#        need to figure out why the output is not as the expected with highest to be the lowest
 def task1(CSVfile: str, category: str) -> list[str]:
-    # Open the file Amazon_products.csv
-    # product_id,product_name,category,discounted_price $,actual_price $,discount_percentage %,rating,rating_count
+    # Open the product file 
     with open(CSVfile, 'r') as product_file:
         # Skip the first header line
         product_file.readline()
-        # Initialise values
-        hdiscount = 0
-        for line in product_file:
-            row = line.split(',')
-            if row[2] == category:
-                hdiscount = int(row[3])
-                break
-        ldiscount = hdiscount
-        hid, lid = '', ''
+        # Initialise the values
+        hdiscount, ldiscount = 0, 0
         # Get the highest and lowest discount and it's id
         for line in product_file:
             row = line.split(',')
             if row[2] == category:
-                if int(row[3]) > hdiscount:
+                if int(row[3]) > hdiscount or hdiscount == 0:
                     hdiscount = int(row[3])
                     hid = row[0]
-                elif int(row[3]) < ldiscount:
+                elif int(row[3]) < ldiscount or ldiscount == 0:
                     ldiscount = int(row[3])
                     lid = row[0]
     return [hid, lid]
@@ -195,7 +181,7 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
 ''' Temp Testing Part of The Project'''
 
 
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'Computers&Accessories')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'Electronics')
 print(OP1)
 print(OP2)
 print(OP3)
