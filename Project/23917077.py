@@ -1,7 +1,16 @@
-def main():
+def main(CSVfile: str, TXTfile: str, category: str):
+    ''' 
+    OP1 = [Product ID1, Product ID2]
+    OP2 = [mean, median, mean absolute deviation]
+    OP3 = [STD1, STD2, ... , STDN]
+    OP4 = Correlation
+    '''
+    OP1, OP2, OP3 = [], [], []
+    OP4 = 0.0
+
     # Open the file Amazon_products.csv
     # product_id,product_name,category,discounted_price $,actual_price $,discount_percentage %,rating,rating_count
-    with open("/Users/vincent/Desktop/Python/CITS1401_Project/Project/Amazon_products.csv", "r") as file1:
+    with open(CSVfile, "r") as file1:
         # Skip the first line
         file1.readline()
         # Initialise values
@@ -17,13 +26,11 @@ def main():
             elif int(row[3]) < ldiscount:
                 ldiscount = int(row[3])
                 lid = row[0]
-
-        # Print values for test
-        #print(f"Product ID: {hid}, Discounted price: {hdiscount}")
-        #print(f"Product ID: {lid}, Discounted price: {ldiscount}")
+    return OP1, OP2, OP3, OP4
  
 
 ''' Mathmatical Part of the Project'''
+
 
 # Function that take an input of integer list and return median value
 def get_median(data_set: list[float]) -> float:
@@ -103,10 +110,16 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
 # Maybe there is a function that convert a list into an int list needed?
 
 
-#main()
+'''Temp Testing Part of The Project'''
+
+
+main("/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv", "", "")
+
+
+# For temp test
 #print(get_median([1, 2, 3, 4, 5]))
 #print(get_average(['1', 1, 3, 4]))
 #print(get_mean_absolute_deviation([1, 2, 3, 4, 5]))
 #print(get_square_root(6))
 #print(get_standard_deviation([1, 2, 3, 4, 5]))
-print(get_correlation_coeddicient([1, 4, 6, 7, 1],[2, 5, 7, 8, 1]))
+#print(get_correlation_coeddicient([1, 4, 6, 7, 1],[2, 5, 7, 8, 1]))
