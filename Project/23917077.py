@@ -73,7 +73,6 @@ def task3(CSVfile: str, min_rating: float, max_rating: float) -> list[float]:
             # Rating conditional
             if min_rating <= float(row[6]) <= max_rating:
                 # Sort the values by category
-                # Might be reversed with more simple conditional
                 try:
                     temp_list = list(temp_dict[row[2]])
                     temp_list.append(float(row[5]))  
@@ -82,7 +81,8 @@ def task3(CSVfile: str, min_rating: float, max_rating: float) -> list[float]:
                 temp_dict.update({row[2]:temp_list})
     # Get the standard deviation for each list
     for row in temp_dict.values():
-        sd_list.append(get_standard_deviation(row))     
+        sd_list.append(get_standard_deviation(row))
+    # Sorted by descending order     
     sd_list.sort(reverse = True)
     return sd_list
 
@@ -107,7 +107,7 @@ def task4(CSVfile: str, TXTfile: str, category: str) -> float:
                 elif unit[1:11] == task1(CSVfile, category)[1]:
                     lo_list[-1] = int(unit[13:])
                     break
-    cc_num = get_correlation_coeddicient(hi_list, lo_list)
+    cc_num = round(get_correlation_coeddicient(hi_list, lo_list), 4)
     return cc_num
 
 
@@ -120,11 +120,11 @@ def get_median(data_set: list[float]) -> float:
     list_len = len(data_set)
     # Sort the list
     data_set.sort()
-    # If n is odd
+    # If the lenth of list is odd
     if list_len % 2:
         median_num = data_set[int((list_len + 1) / 2) - 1]
         return median_num
-    # If n is even
+    # If len is even
     else:
         median_num = (data_set[int(list_len / 2) - 1] + data_set[int(list_len / 2 + 1) - 1]) / 2
         return median_num
@@ -155,8 +155,7 @@ def get_standard_deviation(data_set: list[float]) -> float:
     for i in range(list_len):
         sd_num += (data_ave - data_set[i]) ** 2
     sd_num /= list_len - 1
-    sd_num = sd_num ** 0.5
-    sd_num = round(sd_num, 4)
+    sd_num = round(sd_num ** 0.5, 4)
     return sd_num
 
 
@@ -181,7 +180,7 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
 ''' Temp Testing Part of The Project'''
 
 
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'Electronics')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'Computers&Accessories')
 print(OP1)
 print(OP2)
 print(OP3)
