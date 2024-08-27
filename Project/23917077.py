@@ -5,8 +5,7 @@ def main(CSVfile: str, TXTfile: str, category: str):
     OP3 = [STD1, STD2, ... , STDN]
     OP4 = Correlation
     '''
-    OP1, OP2, OP3 = [], [], []
-    OP4 = 0.0
+
     
     # Task1
     OP1 = task1(CSVfile, category)
@@ -122,8 +121,6 @@ def task4(CSVfile: str, TXTfile: str, category: str) -> float:
                 elif unit[1:11] == task1(CSVfile, category)[1]:
                     lo_list[-1] = int(unit[13:])
                     break
-    print(hi_list)
-    print(lo_list)
     cc_num = get_correlation_coeddicient(hi_list, lo_list)
     return cc_num
 
