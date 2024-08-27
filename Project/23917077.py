@@ -5,15 +5,18 @@ def main(CSVfile: str, TXTfile: str, category: str):
     OP3 = [STD1, STD2, ... , STDN]
     OP4 = Correlation
     '''
-    OP1, OP2, OP3 = ['', ''], ['', '', ''], ['']
+    OP1, OP2, OP3 = [], [], []
     OP4 = 0.0
     
     # Task1
-    OP1[0], OP1[1] = task1(CSVfile, category)
+    OP1 = task1(CSVfile, category)
 
-    #Task2
-    OP2[0], OP2[1], OP2[2] = task2(CSVfile, category, 1000)
+    # Task2
+    OP2 = task2(CSVfile, category, 1000)
     
+    # Task3
+    OP3 = task3(CSVfile, category, 3.3, 4.3)
+
     # Fianlly return the target values
     return OP1, OP2, OP3, OP4
 
@@ -33,7 +36,7 @@ def task1(CSVfile: str, category: str) -> list[str]:
         # Initialise values
         hdiscount = 0
         for line in product_file:
-            row = line.rstrip().split(",")
+            row = line.rstrip().split(',')
             if row[2] == category:
                 hdiscount = int(row[3])
                 break
@@ -41,7 +44,7 @@ def task1(CSVfile: str, category: str) -> list[str]:
         hid, lid = '', ''
         # Get the highest and lowest discount and it's id
         for line in product_file:
-            row = line.rstrip().split(",")
+            row = line.rstrip().split(',')
             if row[2] == category:
                 if int(row[3]) > hdiscount:
                     hdiscount = int(row[3])
@@ -49,7 +52,7 @@ def task1(CSVfile: str, category: str) -> list[str]:
                 elif int(row[3]) < ldiscount:
                     ldiscount = int(row[3])
                     lid = row[0]
-    return hid, lid
+    return [hid, lid]
 
 
 # Function for task2
@@ -60,16 +63,41 @@ def task2(CSVfile: str, category: str, rating_count: int) -> list[float]:
         product_file.readline()
         # Get the needed values as a list
         for line in product_file:
-            row = line.rstrip().split(",")
+            row = line.rstrip().split(',')
             if row[2] == category and int(row[7]) > rating_count:
                 data_set.append(int(row[4]))
         # Get the values
         mean = get_average(data_set)
         median = get_median(data_set)
         mean_absolute_deviation = get_mean_absolute_deviation(data_set)
-    return mean, median, mean_absolute_deviation
+    return [mean, median, mean_absolute_deviation]
 
 
+# Function for task3
+def task3(CSVfile: str, category: str, min_rating: float, max_rating: float) -> list[float]:
+    temp_dict = {}
+    sd_list = []
+    with open(CSVfile, 'r') as product_file:
+        # Skip the first header line
+        product_file.readline()
+        for line in product_file:
+            row = line.rstrip().split(',')
+            # Rating conditional
+            if min_rating <= float(row[6]) <= max_rating:
+                # Sort the values by category
+                # Might be reversed with more simple conditional
+                try:
+                    temp_list = list(temp_dict[row[2]])
+                    temp_list.append(float(row[5]))  
+                except KeyError:
+                    temp_list = [float(row[5])]    
+                temp_dict.update({row[2]:temp_list})
+    # Get the standard deviation for each list
+    for row in temp_dict.values():
+        #print(row)
+        sd_list.append(get_standard_deviation(row))     
+    sd_list.sort(reverse = True)
+    return sd_list
 
 
 ''' Mathmatical Part of the Project'''
@@ -117,6 +145,7 @@ def get_standard_deviation(data_set: list[float]) -> float:
         sd_num += (data_ave - data_set[i]) ** 2
     sd_num /= list_len - 1
     sd_num = sd_num ** 0.5
+    sd_num = round(sd_num, 4)
     return sd_num
 
 
