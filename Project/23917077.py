@@ -15,7 +15,10 @@ def main(CSVfile: str, TXTfile: str, category: str):
     OP2 = task2(CSVfile, category, 1000)
     
     # Task3
-    OP3 = task3(CSVfile, category, 3.3, 4.3)
+    OP3 = task3(CSVfile, 3.3, 4.3)
+
+    # Task4
+    OP4 = task4(CSVfile, TXTfile, category)
 
     # Fianlly return the target values
     return OP1, OP2, OP3, OP4
@@ -36,7 +39,7 @@ def task1(CSVfile: str, category: str) -> list[str]:
         # Initialise values
         hdiscount = 0
         for line in product_file:
-            row = line.rstrip().split(',')
+            row = line.split(',')
             if row[2] == category:
                 hdiscount = int(row[3])
                 break
@@ -44,7 +47,7 @@ def task1(CSVfile: str, category: str) -> list[str]:
         hid, lid = '', ''
         # Get the highest and lowest discount and it's id
         for line in product_file:
-            row = line.rstrip().split(',')
+            row = line.split(',')
             if row[2] == category:
                 if int(row[3]) > hdiscount:
                     hdiscount = int(row[3])
@@ -63,7 +66,7 @@ def task2(CSVfile: str, category: str, rating_count: int) -> list[float]:
         product_file.readline()
         # Get the needed values as a list
         for line in product_file:
-            row = line.rstrip().split(',')
+            row = line.split(',')
             if row[2] == category and int(row[7]) > rating_count:
                 data_set.append(int(row[4]))
         # Get the values
@@ -74,14 +77,14 @@ def task2(CSVfile: str, category: str, rating_count: int) -> list[float]:
 
 
 # Function for task3
-def task3(CSVfile: str, category: str, min_rating: float, max_rating: float) -> list[float]:
+def task3(CSVfile: str, min_rating: float, max_rating: float) -> list[float]:
     temp_dict = {}
     sd_list = []
     with open(CSVfile, 'r') as product_file:
         # Skip the first header line
         product_file.readline()
         for line in product_file:
-            row = line.rstrip().split(',')
+            row = line.split(',')
             # Rating conditional
             if min_rating <= float(row[6]) <= max_rating:
                 # Sort the values by category
@@ -94,10 +97,35 @@ def task3(CSVfile: str, category: str, min_rating: float, max_rating: float) -> 
                 temp_dict.update({row[2]:temp_list})
     # Get the standard deviation for each list
     for row in temp_dict.values():
-        #print(row)
         sd_list.append(get_standard_deviation(row))     
     sd_list.sort(reverse = True)
     return sd_list
+
+
+# Function for task4
+def task4(CSVfile: str, TXTfile: str, category: str) -> float:
+    # Initialise two lists with highest and lowest discounted product
+    hi_list, lo_list =  [], []
+    # Open TXT file
+    with open(TXTfile, 'r') as sales_file:
+        for line in sales_file:
+            # Get 'xxx:xxx'
+            line_list = line.split(',')
+            # Initialise the value of the list
+            hi_list.append(0)
+            lo_list.append(0)
+            for unit in line_list:
+                # Have a slice to get the id and the number
+                if unit[1:11] == task1(CSVfile, category)[0]:
+                    hi_list[-1] = int(unit[13:])
+                    break
+                elif unit[1:11] == task1(CSVfile, category)[1]:
+                    lo_list[-1] = int(unit[13:])
+                    break
+    print(hi_list)
+    print(lo_list)
+    cc_num = get_correlation_coeddicient(hi_list, lo_list)
+    return cc_num
 
 
 ''' Mathmatical Part of the Project'''
@@ -167,23 +195,11 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
     return cc_num
 
 
-# Maybe there is a function that convert a list into an int list needed?
-
-
 ''' Temp Testing Part of The Project'''
 
 
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '', 'Computers&Accessories')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'Computers&Accessories')
 print(OP1)
 print(OP2)
 print(OP3)
 print(OP4)
-
-
-# For temp test
-#print(get_median([1, 2, 3, 4, 5]))
-#print(get_average(['1', 1, 3, 4]))
-#print(get_mean_absolute_deviation([1, 2, 3, 4, 5]))
-#print(get_square_root(6))
-#print(get_standard_deviation([1, 2, 3, 4, 5]))
-#print(get_correlation_coeddicient([1, 4, 6, 7, 1],[2, 5, 7, 8, 1]))
