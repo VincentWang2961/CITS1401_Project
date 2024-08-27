@@ -23,19 +23,46 @@ def main():
  
 
 # Function that take an input of integer list and return median value
-def get_median(data_set: list):
+def get_median(data_set: list[float]) -> float:
     # Get the number of data set
-    n = len(data_set)
+    list_len = len(data_set)
     # Sort the list
     data_set.sort()
     # If n is odd
-    if n % 2:
-        return data_set[int((n + 1) / 2) - 1]
+    if list_len % 2:
+        median_num = data_set[int((list_len + 1) / 2) - 1]
+        return median_num
     # If n is even
     else:
-        return (data_set[int(n / 2) - 1] + data_set[int(n / 2 + 1) - 1]) / 2
+        median_num = (data_set[int(list_len / 2) - 1] + data_set[int(list_len / 2 + 1) - 1]) / 2
+        return median_num
 
+
+
+# Function that take an int data set and return a float number
+def get_average(data_set: list[float]) -> float:
+    sum = 0.0
+    for i in data_set:
+        sum += i
+    ave = sum / len(data_set)
+    return ave
+
+
+# Function that to get mean absolute deviation
+def get_mean_absolute_deviation(data_set: list[float]) -> float:
+    data_ave = get_average(data_set)
+    list_len = len(data_set)
+    md_num = 0
+    for i in range(list_len):
+        md_num += abs(data_ave - data_set[i])
+    md_num /= list_len
+    return md_num
+
+
+# Maybe there is a function that convert a list into an int list needed?
 
 
 #main()
-print(get_median([1, 2, 3, 4, 5, 6]) + 1)
+#print(get_median([1, 2, 3, 4, 5]))
+#print(get_average(['1', 1, 3, 4]))
+print(get_mean_absolute_deviation([1, 2, 3, 4, 5]))
