@@ -1,18 +1,14 @@
 def main(CSVfile: str, TXTfile: str, category: str):
-    ''' 
-    OP1 = [Product ID1, Product ID2]
-    OP2 = [mean, median, mean absolute deviation]
-    OP3 = [STD1, STD2, ... , STDN]
-    OP4 = Correlation
-    '''
     
-    # Task1
+    category = category.lower()
+
+    # Task1, OP1 = [Product ID1, Product ID2]
     OP1 = task1(CSVfile, category)
-    # Task2
+    # Task2, OP2 = [mean, median, mean absolute deviation]
     OP2 = task2(CSVfile, category, 1000)
-    # Task3
+    # Task3, [STD1, STD2, ... , STDN]
     OP3 = task3(CSVfile, 3.3, 4.3)
-    # Task4
+    # Task4, Correlation
     OP4 = task4(CSVfile, TXTfile, category)
 
     # Fianlly return the target values
@@ -32,7 +28,7 @@ def task1(CSVfile: str, category: str) -> list[str]:
         hdiscount, ldiscount = 0, 0
         # Get the highest and lowest discount and it's id
         for line in product_file:
-            row = line.split(',')
+            row = to_lower_case(line.split(','))
             if row[2] == category:
                 if int(row[3]) > hdiscount or hdiscount == 0:
                     hdiscount = int(row[3])
@@ -51,7 +47,7 @@ def task2(CSVfile: str, category: str, rating_count: int) -> list[float]:
         product_file.readline()
         # Get the needed values as a list
         for line in product_file:
-            row = line.split(',')
+            row = to_lower_case(line.split(','))
             if row[2] == category and int(row[7]) > rating_count:
                 data_set.append(int(row[4]))
         # Get the values
@@ -69,7 +65,7 @@ def task3(CSVfile: str, min_rating: float, max_rating: float) -> list[float]:
         # Skip the first header line
         product_file.readline()
         for line in product_file:
-            row = line.split(',')
+            row = to_lower_case(line.split(','))
             # Rating conditional
             if min_rating <= float(row[6]) <= max_rating:
                 # Sort the values by category
@@ -95,7 +91,7 @@ def task4(CSVfile: str, TXTfile: str, category: str) -> float:
     with open(TXTfile, 'r') as sales_file:
         for line in sales_file:
             # Get 'xxx:xxx'
-            line_list = line.split(',')
+            line_list = to_lower_case(line.split(','))
             # Initialise the value of the list
             hi_list.append(0)
             lo_list.append(0)
@@ -111,7 +107,7 @@ def task4(CSVfile: str, TXTfile: str, category: str) -> float:
     return cc_num
 
 
-''' Mathmatical Part of the Project'''
+''' Mathmatical Functions of the Project'''
 
 
 # Function that take an input of integer list and return median value
@@ -176,6 +172,14 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
     cc_num = numerator / denumerator
     return cc_num
 
+''' Other Functions'''
+
+# Function that implement case insensitive to a list
+def to_lower_case(olist: list[str]) -> list:
+    list_len = len(olist)
+    for i in range(list_len):
+        olist[i] = olist[i].lower()
+    return olist
 
 ''' Temp Testing Part of The Project'''
 
