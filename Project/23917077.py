@@ -119,10 +119,10 @@ def get_median(data_set: list[float]) -> float:
         mid = list_len // 2
         # If the lenth of list is odd
         if list_len % 2:
-            return (data_set[mid - 1] + data_set[mid]) / 2
+            return data_set[mid]
         # If len is even
         else:
-            return data_set[mid]
+            return (data_set[mid - 1] + data_set[mid]) / 2
     except Exception:
         print("Can not get the median")
         return 0
@@ -137,11 +137,7 @@ def get_average(data_set: list[float]) -> float:
 def get_mean_absolute_deviation(data_set: list[float]) -> float:
     try:
         data_ave = get_average(data_set)
-        list_len = len(data_set)
-        md_num = 0
-        for i in range(list_len):
-            md_num += abs(data_ave - data_set[i])
-        md_num /= list_len
+        md_num = sum(abs(data_ave - i) for i in data_set) / len(data_set)
         return md_num
     except Exception:
         print("Can not get the mean abosulute deviation")
@@ -153,10 +149,7 @@ def get_standard_deviation(data_set: list[float]) -> float:
     try:
         data_ave = get_average(data_set)
         list_len = len(data_set)
-        sd_num = 0
-        for i in range(list_len):
-            sd_num += (data_ave - data_set[i]) ** 2
-        sd_num /= list_len - 1
+        sd_num = sum((data_ave - i) ** 2 for i in data_set) / (list_len - 1)
         sd_num = round(sd_num ** 0.5, 4)
         return sd_num
     except Exception:
@@ -169,16 +162,12 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
     try:
         # Set the ave values of x and y
         ave_x, ave_y = get_average(data_set_x), get_average(data_set_y)
-        # Initialise variables of numerator and denumerator
-        numerator = 0
-        denumerator_temp1, denumerator_temp2 = 0, 0
-        list_len = len(data_set_x)
-        # Get values by throughout two lists
-        for i in range(list_len):
-            numerator += (data_set_x[i] - ave_x) * (data_set_y[i] - ave_y)
-            denumerator_temp1 += (data_set_x[i] - ave_x) ** 2
-            denumerator_temp2 += (data_set_y[i] - ave_y) ** 2
-        denumerator = (denumerator_temp1 * denumerator_temp2) ** 0.5
+        numerator, sum_sq_x, sum_sq_y = 0, 0, 0
+        for x, y in zip(data_set_x, data_set_y):
+            numerator += (x - ave_x) * (y - ave_y)
+            sum_sq_x += (x - ave_x) ** 2
+            sum_sq_y += (y - ave_y) ** 2
+        denumerator = (sum_sq_x * sum_sq_y) ** 0.5
         cc_num = numerator / denumerator
         return cc_num
     except Exception:
@@ -201,8 +190,9 @@ def to_lower_case(olist: list[str]) -> list:
 
 
 OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'Computers&Accessories')
-print(OP1)
-print(OP2)
-print(OP3)
-print(OP4)
-print(get_correlation_coeddicient([],[]))
+if OP1 == ['b07vtfn6hm', 'b08y5kxr6z'] and OP2 == [2018.8, 800, 2132.48] and OP3 == [0.297, 0.2654, 0.2311, 0.198, 0.1701, 0.1596, 0.0071] and OP4 == -0.0232:
+    print("PASSED!")
+#print(OP1)
+#print(OP2)
+#print(OP3)
+#print(OP4)
