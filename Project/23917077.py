@@ -83,7 +83,7 @@ def task3(CSVfile: str, min_rating: float, max_rating: float) -> list[float]:
     return sd_list
 
 
-# Function for task4
+# Function for task4 to get correlation
 def task4(CSVfile: str, TXTfile: str, category: str) -> float:
     # Initialise two lists with highest and lowest discounted product
     hi_list, lo_list =  [], []
@@ -112,67 +112,82 @@ def task4(CSVfile: str, TXTfile: str, category: str) -> float:
 
 # Function that take an input of integer list and return median value
 def get_median(data_set: list[float]) -> float:
-    # Get the number of data set
-    list_len = len(data_set)
-    # Sort the list
-    data_set.sort()
-    # If the lenth of list is odd
-    if list_len % 2:
-        median_num = data_set[int((list_len + 1) / 2) - 1]
-        return median_num
-    # If len is even
-    else:
-        median_num = (data_set[int(list_len / 2) - 1] + data_set[int(list_len / 2 + 1) - 1]) / 2
-        return median_num
+    try:
+        # Get the len, midlen and sort the list
+        list_len = len(data_set)
+        data_set.sort()
+        mid = list_len // 2
+        # If the lenth of list is odd
+        if list_len % 2:
+            return (data_set[mid - 1] + data_set[mid]) / 2
+        # If len is even
+        else:
+            return data_set[mid]
+    except Exception:
+        print("Can not get the median")
+        return 0
 
 
 # Function that take an int data set and return a float number
 def get_average(data_set: list[float]) -> float:
-    ave = sum(data_set) / len(data_set)
-    return ave
-
+        ave = sum(data_set) / len(data_set)
+        return ave
 
 # Function that to get mean absolute deviation
 def get_mean_absolute_deviation(data_set: list[float]) -> float:
-    data_ave = get_average(data_set)
-    list_len = len(data_set)
-    md_num = 0
-    for i in range(list_len):
-        md_num += abs(data_ave - data_set[i])
-    md_num /= list_len
-    return md_num
+    try:
+        data_ave = get_average(data_set)
+        list_len = len(data_set)
+        md_num = 0
+        for i in range(list_len):
+            md_num += abs(data_ave - data_set[i])
+        md_num /= list_len
+        return md_num
+    except Exception:
+        print("Can not get the mean abosulute deviation")
+        return 0
 
 
 # Function to get the standard deviation
 def get_standard_deviation(data_set: list[float]) -> float:
-    data_ave = get_average(data_set)
-    list_len = len(data_set)
-    sd_num = 0
-    for i in range(list_len):
-        sd_num += (data_ave - data_set[i]) ** 2
-    sd_num /= list_len - 1
-    sd_num = round(sd_num ** 0.5, 4)
-    return sd_num
+    try:
+        data_ave = get_average(data_set)
+        list_len = len(data_set)
+        sd_num = 0
+        for i in range(list_len):
+            sd_num += (data_ave - data_set[i]) ** 2
+        sd_num /= list_len - 1
+        sd_num = round(sd_num ** 0.5, 4)
+        return sd_num
+    except Exception:
+        print("Can not get the standatf deviation")
+        return 0
 
 
 # Function that take two lists and return the correlation coeddicient value
 def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
-    # Set the ave values of x and y
-    ave_x, ave_y = get_average(data_set_x), get_average(data_set_y)
-    # Initialise variables of numerator and denumerator
-    numerator = 0
-    denumerator_temp1, denumerator_temp2 = 0, 0
-    list_len = len(data_set_x)
-    # Get values by throughout two lists
-    for i in range(list_len):
-        numerator += (data_set_x[i] - ave_x) * (data_set_y[i] - ave_y)
-        denumerator_temp1 += (data_set_x[i] - ave_x) ** 2
-        denumerator_temp2 += (data_set_y[i] - ave_y) ** 2
-    denumerator = (denumerator_temp1 * denumerator_temp2) ** 0.5
-    cc_num = numerator / denumerator
-    return cc_num
+    try:
+        # Set the ave values of x and y
+        ave_x, ave_y = get_average(data_set_x), get_average(data_set_y)
+        # Initialise variables of numerator and denumerator
+        numerator = 0
+        denumerator_temp1, denumerator_temp2 = 0, 0
+        list_len = len(data_set_x)
+        # Get values by throughout two lists
+        for i in range(list_len):
+            numerator += (data_set_x[i] - ave_x) * (data_set_y[i] - ave_y)
+            denumerator_temp1 += (data_set_x[i] - ave_x) ** 2
+            denumerator_temp2 += (data_set_y[i] - ave_y) ** 2
+        denumerator = (denumerator_temp1 * denumerator_temp2) ** 0.5
+        cc_num = numerator / denumerator
+        return cc_num
+    except Exception:
+        print("Can not get the correlation coeddicient")
+        return 0
+
 
 ''' Other Functions'''
+
 
 # Function that implement case insensitive to a list
 def to_lower_case(olist: list[str]) -> list:
@@ -180,6 +195,7 @@ def to_lower_case(olist: list[str]) -> list:
     for i in range(list_len):
         olist[i] = olist[i].lower()
     return olist
+
 
 ''' Temp Testing Part of The Project'''
 
@@ -189,3 +205,4 @@ print(OP1)
 print(OP2)
 print(OP3)
 print(OP4)
+print(get_correlation_coeddicient([],[]))
