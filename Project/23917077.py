@@ -1,15 +1,18 @@
 def main(CSVfile: str, TXTfile: str, category: str):
-    
+    # Case insensitive
     category = category.lower()
 
+    # Read the files
+    product_list = read_file(CSVfile)
+    sales_list = read_file(TXTfile)
     # Task1, OP1 = [Product ID1, Product ID2]
-    OP1 = task1(CSVfile, category)
+    OP1 = task1(product_list[1:], category)
     # Task2, OP2 = [mean, median, mean absolute deviation]
-    OP2 = task2(CSVfile, category, 1000)
+    OP2 = task2(product_list[1:], category, 1000)
     # Task3, [STD1, STD2, ... , STDN]
-    OP3 = task3(CSVfile, 3.3, 4.3)
+    OP3 = task3(product_list[1:], 3.3, 4.3)
     # Task4, Correlation
-    OP4 = task4(CSVfile, TXTfile, category)
+    OP4 = task4(product_list[1:], sales_list, category)
 
     # Fianlly return the target values
     return OP1, OP2, OP3, OP4
@@ -18,96 +21,85 @@ def main(CSVfile: str, TXTfile: str, category: str):
 ''' Task Functions'''
 
 
-# Function of task1, to get highest and lowest id
-def task1(CSVfile: str, category: str) -> list[str]:
-    # Open the product file 
-    with open(CSVfile, 'r') as product_file:
-        # Skip the first header line
-        product_file.readline()
-        # Initialise the values
-        hdiscount, ldiscount = 0, 0
-        # Get the highest and lowest discount and it's id
-        for line in product_file:
-            row = to_lower_case(line.split(','))
-            if row[2] == category:
-                if int(row[3]) > hdiscount or hdiscount == 0:
-                    hdiscount = int(row[3])
-                    hid = row[0]
-                elif int(row[3]) < ldiscount or ldiscount == 0:
-                    ldiscount = int(row[3])
-                    lid = row[0]
+# Function for task1, to get highest and lowest id
+def task1(product_file: list, category: str) -> list[str]:
+    hdiscount, ldiscount = None, None
+    for line in product_file:
+        row = line.lower().split(',')
+        # Find the category
+        if category in row[2]:
+            discount = int(row[3])
+            # To get the hdiscount and its id
+            if hdiscount is None or discount > hdiscount:
+                hdiscount = discount
+                hid = row[0]
+            # To get the ldiscount and its id
+            elif ldiscount is None or discount < ldiscount:
+                ldiscount = discount
+                lid = row[0]
     return [hid, lid]
 
 
 # Function for task2
-def task2(CSVfile: str, category: str, rating_count: int) -> list[float]:
+def task2(product_file: list, category: str, rating_count: int) -> list[float]:
     data_set = []
-    with open(CSVfile, 'r') as product_file:
-        # Skip the first header line
-        product_file.readline()
-        # Get the needed values as a list
-        for line in product_file:
-            row = to_lower_case(line.split(','))
-            if row[2] == category and int(row[7]) > rating_count:
-                data_set.append(int(row[4]))
-        # Get the values
-        mean = get_average(data_set)
-        median = get_median(data_set)
-        mean_absolute_deviation = get_mean_absolute_deviation(data_set)
+    # Get the needed values as a list
+    for line in product_file:
+        row = line.lower().split(',')
+        if category in row[2] and int(row[7]) > rating_count:
+            data_set.append(int(row[4]))
+    # Get the values
+    mean = get_average(data_set)
+    median = get_median(data_set)
+    mean_absolute_deviation = get_mean_absolute_deviation(data_set)
     return [mean, median, mean_absolute_deviation]
 
 
 # Function for task3
-def task3(CSVfile: str, min_rating: float, max_rating: float) -> list[float]:
+def task3(product_file: list, min_rating: float, max_rating: float) -> list[float]:
     temp_dict = {}
     sd_list = []
-    with open(CSVfile, 'r') as product_file:
-        # Skip the first header line
-        product_file.readline()
-        for line in product_file:
-            row = to_lower_case(line.split(','))
-            # Rating conditional
-            if min_rating <= float(row[6]) <= max_rating:
-                # Sort the values by category
-                try:
-                    temp_list = list(temp_dict[row[2]])
-                    temp_list.append(float(row[5]))  
-                except KeyError:
-                    temp_list = [float(row[5])]    
-                temp_dict.update({row[2]:temp_list})
-    # Get the standard deviation for each list
+    for line in product_file:
+        row = line.lower().split(',')
+        # Rating conditional
+        if min_rating <= float(row[6]) <= max_rating:
+            # Sort the values by category to make a dict
+            category = row[2]
+            discount_percent = float(row[5])
+            if category in temp_dict:
+                temp_dict[category].append(discount_percent)  
+            else:
+                temp_dict[category] = [discount_percent]
+    # Get the standard deviation for each list in the dict
     for row in temp_dict.values():
         sd_list.append(get_standard_deviation(row))
-    # Sorted by descending order     
     sd_list.sort(reverse = True)
     return sd_list
 
 
 # Function for task4 to get correlation
-def task4(CSVfile: str, TXTfile: str, category: str) -> float:
+def task4(product_file: list, sales_file: list, category: str) -> float:
     # Initialise two lists with highest and lowest discounted product
     hi_list, lo_list =  [], []
-    # Open TXT file
-    with open(TXTfile, 'r') as sales_file:
-        for line in sales_file:
-            # Get 'xxx:xxx'
-            line_list = to_lower_case(line.split(','))
-            # Initialise the value of the list
-            hi_list.append(0)
-            lo_list.append(0)
-            for unit in line_list:
-                # Have a slice to get the id and the number
-                if unit[1:11] == task1(CSVfile, category)[0]:
-                    hi_list[-1] = int(unit[13:])
-                    break
-                elif unit[1:11] == task1(CSVfile, category)[1]:
-                    lo_list[-1] = int(unit[13:])
-                    break
+    for line in sales_file:
+        line_list = line.lower().split(',')
+        # Initialise the value of the list
+        hi_list.append(0)
+        lo_list.append(0)
+        for unit in line_list:
+            # Have a slice to get the id and the number
+            if unit[1:11] == task1(product_file, category)[0]:
+                hi_list[-1] = int(unit[13:])
+                break
+            elif unit[1:11] == task1(product_file, category)[1]:
+                lo_list[-1] = int(unit[13:])
+                break
     cc_num = round(get_correlation_coeddicient(hi_list, lo_list), 4)
     return cc_num
 
 
-''' Mathmatical Functions of the Project'''
+''' Mathematical Functions of the Project '''
+# TODO: try-except need more consideration
 
 
 # Function that take an input of integer list and return median value
@@ -132,6 +124,7 @@ def get_median(data_set: list[float]) -> float:
 def get_average(data_set: list[float]) -> float:
         ave = sum(data_set) / len(data_set)
         return ave
+
 
 # Function that to get mean absolute deviation
 def get_mean_absolute_deviation(data_set: list[float]) -> float:
@@ -162,6 +155,7 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
     try:
         # Set the ave values of x and y
         ave_x, ave_y = get_average(data_set_x), get_average(data_set_y)
+        # Initialisation
         numerator, sum_sq_x, sum_sq_y = 0, 0, 0
         for x, y in zip(data_set_x, data_set_y):
             numerator += (x - ave_x) * (y - ave_y)
@@ -178,21 +172,21 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
 ''' Other Functions'''
 
 
-# Function that implement case insensitive to a list
-def to_lower_case(olist: list[str]) -> list:
-    list_len = len(olist)
-    for i in range(list_len):
-        olist[i] = olist[i].lower()
-    return olist
+# Function to get the info list from a file
+def read_file(file: str) -> list:
+    file_list = []
+    with open(file) as open_file:
+        for line in open_file:
+            file_list.append(line)
+    return file_list
+
 
 
 ''' Temp Testing Part of The Project'''
 
 
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'Computers&Accessories')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_products.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Amazon product and sales data/Amazon_sales.txt', 'COmputers&Accessories')
 if OP1 == ['b07vtfn6hm', 'b08y5kxr6z'] and OP2 == [2018.8, 800, 2132.48] and OP3 == [0.297, 0.2654, 0.2311, 0.198, 0.1701, 0.1596, 0.0071] and OP4 == -0.0232:
     print("PASSED!")
-#print(OP1)
-#print(OP2)
-#print(OP3)
-#print(OP4)
+else:
+    print("ERROR! NOT PASSED!")
