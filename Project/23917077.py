@@ -1,112 +1,120 @@
 def main(CSVfile: str, TXTfile: str, category: str):
     # Read the files
-    product_list = read_file(CSVfile)
-    sales_list = read_file(TXTfile)
+    product_list = read_file_as_list(CSVfile)
+    sales_list = read_file_as_list(TXTfile)
 
-    # File errors handling
-    if product_list is 0 or sales_list is 0:
-        raise Exception("ERROR! No such file founded!")
-    elif len(product_list) is 0 or len(sales_list) is 0:
-        raise Exception("ERROR! No data avaliable!")
+    # File error occur if there is no valid info in the files
+    if len(product_list) <= 1 or len(sales_list) == 0:
+        print("[main]ERROR: An unexpected error occurred: No data avaliable.")
+        return [], [], [], 0
     
-    # Case insensitive
+    # Case insensitive for category
     category = category.lower()
 
-    # Initialisation to prevent unknowable error
+    # Initialisation to prevent unexpected error
     OP1, OP2, OP3, OP4 = [], [], [], 0
 
     # Task1, OP1 = [Product ID1, Product ID2]
-    OP1 = task1(product_list[1:], category)
+    OP1 = task1(product_list, category)
     # Task2, OP2 = [mean, median, mean absolute deviation]
-    OP2 = task2(product_list[1:], category, 1000)
+    OP2 = task2(product_list, category, 1000)
     # Task3, [STD1, STD2, ... , STDN]
-    OP3 = task3(product_list[1:], 3.3, 4.3)
+    OP3 = task3(product_list, 3.3, 4.3)
     # Task4, Correlation
-    OP4 = task4(product_list[1:], sales_list, category)
+    OP4 = task4(sales_list, OP1[0], OP1[1])
 
-    # Fianlly return the target values
+    # Eventually return the target values
     return OP1, OP2, OP3, OP4
 
 
 ''' Task Functions'''
 
 
-# Function for task1, to get highest and lowest id
-def task1(product_file: list, category: str) -> list[str]:
+# Identify Extreme Discount Prices
+def task1(product_list: list, category: str) -> list[str]:
     hdiscounted, ldiscounted = None, None
-    for line in product_file:
-        row = line.lower().split(',')
+    # Index
+    category_index = get_index(product_list, "category")
+    discounted_price_index = get_index(product_list, "discounted_price $")
+    product_id_index = get_index(product_list, "product_id")
+    product_list = product_list[1:]
+    for row in product_list:
         # Find the category
-        if category in row[2]:
-            discounted = int(row[3])
+        if category in row[category_index]:
+            discounted = int(row[discounted_price_index])
             # Initialisation for high and low discounted
             if hdiscounted is None:
                 hdiscounted, ldiscounted = discounted, discounted
-                hid, lid = row[0], row[0]
+                hid, lid = row[product_id_index], row[product_id_index]
             # To get the hdiscount and its id
             elif discounted > hdiscounted:
                 hdiscounted = discounted
-                hid = row[0]
+                hid = row[product_id_index]
             # To get the ldiscount and its id
             elif discounted < ldiscounted:
                 ldiscounted = discounted
-                lid = row[0]
+                lid = row[product_id_index]
     return [hid, lid]
 
 
-# Function for task2
-def task2(product_file: list, category: str, rating_count: int) -> list[float]:
+# Summarize Price Distribution
+def task2(product_list: list, category: str, rating_count: int) -> list[float]:
+    # Index
+    category_index = get_index(product_list, "category")
+    rating_count_index = get_index(product_list, "rating_count")
+    actual_price_index = get_index(product_list, "actual_price $")
+    product_list = product_list[1:]
     data_set = []
     # Get the needed values as a list
-    for line in product_file:
-        row = line.lower().split(',')
-        if category in row[2] and float(row[7]) > rating_count:
-            data_set.append(float(row[4]))
-    # Get the values
+    for row in product_list:
+        if category in row[category_index] and float(row[rating_count_index]) > rating_count:
+            data_set.append(float(row[actual_price_index]))
+    # Get the values by mathematical functions
     mean = get_average(data_set)
     median = get_median(data_set)
-    mean_absolute_deviation = get_mean_absolute_deviation(data_set)
+    mean_absolute_deviation = get_mean_absolute_deviation(data_set, mean)
     return [mean, median, mean_absolute_deviation]
 
 
-# Function for task3
-def task3(product_file: list, min_rating: float, max_rating: float) -> list[float]:
-    temp_dict = {}
-    sd_list = []
-    for line in product_file:
-        row = line.lower().split(',')
+# Calculate Standard Deviation of Discounted Percentages
+def task3(product_list: list, min_rating: float, max_rating: float) -> list[float]:
+    temp_dict, sd_list = {}, []
+    # Index
+    category_index = get_index(product_list, "category")
+    rating_index = get_index(product_list, "rating")
+    discount_percentage_index = get_index(product_list, "discount_percentage %")
+    product_list = product_list[1:]
+    for row in product_list:
         # Rating conditional
-        if min_rating <= float(row[6]) <= max_rating:
+        if min_rating <= float(row[rating_index]) <= max_rating:
             # Sort the values by category to make a dict
-            category = row[2]
-            discount_percent = float(row[5])
+            category = row[category_index]
+            discount_percent = float(row[discount_percentage_index])
             if category in temp_dict:
                 temp_dict[category].append(discount_percent)  
             else:
                 temp_dict[category] = [discount_percent]
-    # Get the standard deviation for each list in the dict
+    # Get the standard deviation for each list from the dict
     for row in temp_dict.values():
         sd_list.append(get_standard_deviation(row))
     sd_list.sort(reverse = True)
     return sd_list
 
 
-# Function for task4 to get correlation
-# TODO remove call task 1
-def task4(product_file: list, sales_file: list, category: str) -> float:
+# Correlate Sales Data
+def task4(sales_list: list, hid: str, lid: str) -> float:
     # Initialise two lists with highest and lowest discounted product
     hi_list, lo_list =  [], []
-    for line in sales_file:
-        line_list = line.lower().split(',')
+    for row in sales_list:
         # Initialise the value of the list
         hi_list.append(0)
         lo_list.append(0)
-        for unit in line_list:
+        for unit in row[1:]:
             # Have a slice to get the id and the number
-            if unit[1:11] == task1(product_file, category)[0]:
+            if unit[1:11] == hid:
                 hi_list[-1] = int(unit[13:])
                 break
-            elif unit[1:11] == task1(product_file, category)[1]:
+            elif unit[1:11] == lid:
                 lo_list[-1] = int(unit[13:])
                 break
     cc_num = round(get_correlation_coeddicient(hi_list, lo_list), 4)
@@ -118,8 +126,7 @@ def task4(product_file: list, sales_file: list, category: str) -> float:
 
 # Function that take an input of integer list and return median value
 def get_median(data_set: list[float]) -> float:
-    try:
-        validate_data_set(data_set)     
+    try:  
         # Get the len, midlen and sort the list
         list_len = len(data_set)
         data_set.sort()
@@ -138,7 +145,6 @@ def get_median(data_set: list[float]) -> float:
 # Function that take an int data set and return a float number
 def get_average(data_set: list[float]) -> float:
     try:
-        validate_data_set(data_set)
         ave = sum(data_set) / len(data_set)
         return ave
     except Exception as e:
@@ -147,10 +153,8 @@ def get_average(data_set: list[float]) -> float:
 
 
 # Function that to get mean absolute deviation
-def get_mean_absolute_deviation(data_set: list[float]) -> float:
+def get_mean_absolute_deviation(data_set: list[float], data_ave: float) -> float:
     try:
-        validate_data_set(data_set)
-        data_ave = get_average(data_set)
         md_num = sum(abs(data_ave - i) for i in data_set) / len(data_set)
         return md_num
     except Exception as e:
@@ -161,7 +165,7 @@ def get_mean_absolute_deviation(data_set: list[float]) -> float:
 # Function to get the standard deviation
 def get_standard_deviation(data_set: list[float]) -> float:
     try:
-        validate_data_set(data_set)
+        #validate_data_set(data_set)
         if len(data_set) <= 1:
             raise ZeroDivisionError("The input list must have at least 2 values.")
         data_ave = get_average(data_set)
@@ -178,8 +182,6 @@ def get_standard_deviation(data_set: list[float]) -> float:
 # Function that take two lists and return the correlation coeddicient value
 def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
     try:
-        validate_data_set(data_set_x)
-        validate_data_set(data_set_y)
         # Set the ave values of x and y
         ave_x, ave_y = get_average(data_set_x), get_average(data_set_y)
         # Initialisation
@@ -201,31 +203,26 @@ def get_correlation_coeddicient(data_set_x: list, data_set_y: list) -> float:
 ''' Other Functions'''
 
 
-# Function to get the info list from a file
-def read_file(file: str) -> list:
-    try:
-        file_list = []
-        with open(file) as open_file:
-            for line in open_file:
-                file_list.append(line)
-        return file_list
-    except IOError:
-        return 0
+# Function to get the data set list from a file
+def read_file_as_list(file: str) -> list:
+    file_list = []
+    with open(file, 'r') as open_file:
+        for line in open_file:
+            file_list.append(line.lower().strip().split(','))
+    return file_list
     
 
-# Function to validate a data set
-def validate_data_set(data_set: list[float]):
-    if not data_set:
-        raise ValueError("The input list is empty.")
-    if not all(isinstance(i, (int, float)) for i in data_set):
-        raise TypeError("The input list is not numeric.")
-
+# Index function
+def get_index(product_list: list, header: str) -> int:
+    index = product_list[0].index(header)
+    return index
 
 
 ''' Temp Testing Part of The Project'''
 
 
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_products 2.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_sales 2.txt', 'COmputers&Accessories')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_products 2.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_sales 2.txt', 'COmputers&ACcessories')
+#OP1, OP2, OP3, OP4 = main("/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_products 6.csv", "/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_sales 6.txt", "COmputers&ACcessories")
 if OP1 == ['b07vtfn6hm', 'b08y5kxr6z'] and OP2 == [2018.8, 800, 2132.48] and OP3 == [0.297, 0.2654, 0.2311, 0.198, 0.1701, 0.1596, 0.0071] and OP4 == -0.0232:
     print("PASSED!")
 else:
@@ -234,4 +231,3 @@ print(OP1)
 print(OP2)
 print(OP3)
 print(OP4)
-print(get_correlation_coeddicient([1],[1]))
