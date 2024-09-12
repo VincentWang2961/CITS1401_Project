@@ -8,6 +8,11 @@ def main(CSVfile: str, TXTfile: str, category: str):
         print("[main]ERROR: An unexpected error occurred: No data avaliable.")
         return [], [], [], 0
     
+    # Index
+    index_dict = {}
+    for header in product_list[0]:
+        index_dict.update({header: product_list[0].index(header)})
+    
     # Case insensitive for category
     category = category.lower()
 
@@ -15,13 +20,13 @@ def main(CSVfile: str, TXTfile: str, category: str):
     OP1, OP2, OP3, OP4 = [], [], [], 0
 
     # Task1, OP1 = [Product ID1, Product ID2]
-    OP1 = task1(product_list, category)
+    OP1 = find_extreme_discount_prices(product_list[1:], category, index_dict)
     # Task2, OP2 = [mean, median, mean absolute deviation]
-    OP2 = task2(product_list, category, 1000)
+    OP2 = summarize_price_statistics(product_list[1:], category, 1000, index_dict)
     # Task3, [STD1, STD2, ... , STDN]
-    OP3 = task3(product_list, 3.3, 4.3)
+    OP3 = calculate_discount_std_deviation(product_list[1:], 3.3, 4.3, index_dict)
     # Task4, Correlation
-    OP4 = task4(sales_list, OP1[0], OP1[1])
+    OP4 = correlate_sales_data(sales_list, OP1[0], OP1[1])
 
     # Eventually return the target values
     return OP1, OP2, OP3, OP4
@@ -31,44 +36,35 @@ def main(CSVfile: str, TXTfile: str, category: str):
 
 
 # Identify Extreme Discount Prices
-def task1(product_list: list, category: str) -> list[str]:
+def find_extreme_discount_prices(product_list: list, category: str, index_dict: dict) -> list[str]:
     hdiscounted, ldiscounted = None, None
-    # Index
-    category_index = get_index(product_list, "category")
-    discounted_price_index = get_index(product_list, "discounted_price $")
-    product_id_index = get_index(product_list, "product_id")
-    product_list = product_list[1:]
     for row in product_list:
         # Find the category
-        if category in row[category_index]:
-            discounted = int(row[discounted_price_index])
+        if category == row[index_dict["category"]]:
+            discounted = int(row[index_dict["discounted_price $"]])
             # Initialisation for high and low discounted
             if hdiscounted is None:
                 hdiscounted, ldiscounted = discounted, discounted
-                hid, lid = row[product_id_index], row[product_id_index]
+                hid = row[index_dict["product_id"]]
+                lid = hid
             # To get the hdiscount and its id
             elif discounted > hdiscounted:
                 hdiscounted = discounted
-                hid = row[product_id_index]
+                hid = row[index_dict["product_id"]]
             # To get the ldiscount and its id
             elif discounted < ldiscounted:
                 ldiscounted = discounted
-                lid = row[product_id_index]
+                lid = row[index_dict["product_id"]]
     return [hid, lid]
 
 
 # Summarize Price Distribution
-def task2(product_list: list, category: str, rating_count: int) -> list[float]:
-    # Index
-    category_index = get_index(product_list, "category")
-    rating_count_index = get_index(product_list, "rating_count")
-    actual_price_index = get_index(product_list, "actual_price $")
-    product_list = product_list[1:]
+def summarize_price_statistics(product_list: list, category: str, rating_count: int, index_dict: dict) -> list[float]:
     data_set = []
     # Get the needed values as a list
     for row in product_list:
-        if category in row[category_index] and float(row[rating_count_index]) > rating_count:
-            data_set.append(float(row[actual_price_index]))
+        if category == row[index_dict["category"]] and float(row[index_dict["rating_count"]]) > rating_count:
+            data_set.append(float(row[index_dict["actual_price $"]]))
     # Get the values by mathematical functions
     mean = get_average(data_set)
     median = get_median(data_set)
@@ -77,19 +73,14 @@ def task2(product_list: list, category: str, rating_count: int) -> list[float]:
 
 
 # Calculate Standard Deviation of Discounted Percentages
-def task3(product_list: list, min_rating: float, max_rating: float) -> list[float]:
+def calculate_discount_std_deviation(product_list: list, min_rating: float, max_rating: float, index_dict: dict) -> list[float]:
     temp_dict, sd_list = {}, []
-    # Index
-    category_index = get_index(product_list, "category")
-    rating_index = get_index(product_list, "rating")
-    discount_percentage_index = get_index(product_list, "discount_percentage %")
-    product_list = product_list[1:]
     for row in product_list:
         # Rating conditional
-        if min_rating <= float(row[rating_index]) <= max_rating:
+        if min_rating <= float(row[index_dict["rating"]]) <= max_rating:
             # Sort the values by category to make a dict
-            category = row[category_index]
-            discount_percent = float(row[discount_percentage_index])
+            category = row[index_dict["category"]]
+            discount_percent = float(row[index_dict["discount_percentage %"]])
             if category in temp_dict:
                 temp_dict[category].append(discount_percent)  
             else:
@@ -102,7 +93,7 @@ def task3(product_list: list, min_rating: float, max_rating: float) -> list[floa
 
 
 # Correlate Sales Data
-def task4(sales_list: list, hid: str, lid: str) -> float:
+def correlate_sales_data(sales_list: list, hid: str, lid: str) -> float:
     # Initialise two lists with highest and lowest discounted product
     hi_list, lo_list =  [], []
     for row in sales_list:
@@ -210,24 +201,3 @@ def read_file_as_list(file: str) -> list:
         for line in open_file:
             file_list.append(line.lower().strip().split(','))
     return file_list
-    
-
-# Index function
-def get_index(product_list: list, header: str) -> int:
-    index = product_list[0].index(header)
-    return index
-
-
-''' Temp Testing Part of The Project'''
-
-
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_products 2.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_sales 2.txt', 'COmputers&ACcessories')
-#OP1, OP2, OP3, OP4 = main("/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_products 6.csv", "/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_sales 6.txt", "COmputers&ACcessories")
-if OP1 == ['b07vtfn6hm', 'b08y5kxr6z'] and OP2 == [2018.8, 800, 2132.48] and OP3 == [0.297, 0.2654, 0.2311, 0.198, 0.1701, 0.1596, 0.0071] and OP4 == -0.0232:
-    print("PASSED!")
-else:
-    print("ERROR! NOT PASSED!")
-print(OP1)
-print(OP2)
-print(OP3)
-print(OP4)
