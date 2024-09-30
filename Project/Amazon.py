@@ -1,22 +1,3 @@
-"""
-CITS1401 Computational Thinking with Python
-Project 1, Semester 2, 2024 - Analyzing Amazon Data
-
-This program is designed to analyze data from Amazon to identify various trends and statistics associated with product performances within specific categories. It reads product and sales data from CSV and TXT files, respectively, and performs four main tasks:
-
-1. Identifying products with the highest and lowest discounted prices within a specified category.
-2. Summarizing the price distribution (mean, median, and mean absolute deviation) for products within a specified category that have a significant number of ratings.
-3. Calculating the standard deviation of discount percentages for products within a specified rating range.
-4. Correlating the sales data of products with extreme discount prices to evaluate any potential relationships.
-
-Each task is encapsulated within its own function for clarity and modularity. The program strictly adheres to the guidelines provided in the project brief, ensuring no external modules are used and all outputs are processed through basic Python constructs like lists and loops.
-
-Author: Vincent Wang(also Wenshuo Wang)
-Student ID: 23917077
-Date: 13 Sep 2024
-"""
-
-
 def main(CSVfile: str, TXTfile: str, category: str):
     # Read the files
     product_list = read_file_as_list(CSVfile)
@@ -216,17 +197,3 @@ def read_file_as_list(file: str) -> list:
         for line in open_file:
             file_list.append(line.lower().strip().split(','))
     return file_list
-
-
-''' Temp Testing Part of The Project'''
-
-
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_products 1.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST/Amazon_sales 1.txt', 'Omputers&Accessories')
-if OP1 == ['b07vtfn6hm', 'b08y5kxr6z'] and OP2 == [2018.8, 800, 2132.48] and OP3 == [0.297, 0.2654, 0.2311, 0.198, 0.1701, 0.1596, 0.0071] and OP4 == -0.0232:
-    print("PASSED!")
-else:
-    print("ERROR! NOT PASSED!")
-print(OP1)
-print(OP2)
-print(OP3)
-print(OP4)
