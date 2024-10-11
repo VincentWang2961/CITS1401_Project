@@ -2,11 +2,38 @@
 
 '''Main function'''
 
+
 def main(CSVfile: str, TXTfile: str):
     print("For test")
     CSVdict = read_csv_as_dict(CSVfile)
+    OP1 = task1(CSVdict)
+    print(OP1[0]['afghanistan'])
+    print(OP1[1]['afghanistan'])
+
+    #To finish part3 of OP1, txt file is needed
+    #print(OP1[2]['afghanistan'])
+
+'''Task functions'''
+
+
+def task1(CSVdict: dict) -> list:
+    country_to_hospitals = {}
+    country_to_death = {}
+    country_to_covid_stroke = {}
+    for country, hospital, death in zip(CSVdict['country'], CSVdict['hospital_id'], CSVdict['no_of_deaths_in_2022']):
+        if country in country_to_hospitals:
+            country_to_hospitals[country].append(hospital)
+            country_to_death[country].append(death)
+        else:
+            country_to_hospitals.update({country: [hospital]})
+            country_to_death.update({country: [death]})
+
+    return [country_to_hospitals, country_to_death, country_to_covid_stroke]
+
+
 
 '''Functional functions'''
+
 
 # Read file as dict
 def read_csv_as_dict(file: str) -> dict:
@@ -20,60 +47,8 @@ def read_csv_as_dict(file: str) -> dict:
         for line in open_file:
             values = line.lower().strip().split(',')
 
-            # If the length is not as the header's
-            if not len(values) == len(headers):
-                print('ERROR: Length')
+            if validate_data(headers, values, file_dict) is False:
                 continue
-            # If there is an empty of value
-            if '' in values:
-                print('ERROR: None Value')
-                continue
-
-            # If there is an unique hispital ID, and 15long ID length
-            # 15th long id need to be considered
-            hid = values[headers.index('hospital_id')]
-            if 'hospital_id' in file_dict:
-                if not len(hid) == 15:
-                    print('ERROR: hostital_id')
-                    continue
-                elif hid in file_dict['hospital_id']:
-                    print('ERROR: hostital_id')
-                    continue
-
-            # If there is a negative or zero number of staff, or None value
-            sno = values[headers.index('no_of_staff')]
-            if 'no_of_staff' in file_dict:
-                if not int(sno) > 0:
-                    print('ERROR: no_of_staff')
-                    continue
-            
-            # If there is a negative or zero number of patients, or None value
-            # Not sure if the sum of patients of f and m need to be considered
-            pno = values[headers.index('no_of_patients')]
-            mpno = values[headers.index('male_patients')]
-            fpno = values[headers.index('female_patients')]
-            if 'no_of_patients' in file_dict and 'male_patients' in file_dict and 'female_patients' in file_dict:
-                if not (int(pno) > 0 and int(mpno) > 0 and int(fpno) > 0):
-                    print('ERROR: no_of_patients')
-                    continue
-                elif not (int(pno) == int(mpno) + int(fpno)):
-                    print('ERROR: no_of_patients')
-                    continue
-
-            # If there is a negative or zero number of bed, or None value
-            bno = values[headers.index('no_of_beds')]
-            if 'no_of_beds' in file_dict:
-                if not int(bno) > 0:
-                    print('ERROR: no_of_beds')
-                    continue
-
-            # If there is a negative or zero number of deaths, or None value
-            dno22 = values[headers.index('no_of_deaths_in_2022')]
-            dno23 = values[headers.index('no_of_deaths_in_2023')]
-            if 'no_of_deaths_in_2022' in file_dict and 'no_of_deaths_in_2023' in file_dict:
-                if not (int(dno22) > 0 and int(dno23) > 0):
-                    print('ERROR: no_of_deaths')
-                    continue
 
             for header, value in zip(headers, values):
                 file_dict[header].append(value)
@@ -81,7 +56,7 @@ def read_csv_as_dict(file: str) -> dict:
 
 
 def validate_data(headers, values, file_dict):
-    # Check for correct length of values
+    # Check for correct length of values as the header's
     if not len(values) == len(headers):
         print('ERROR: Length')
         return False
@@ -90,7 +65,7 @@ def validate_data(headers, values, file_dict):
     if '' in values:
         print('ERROR: None Value')
         return False
-
+    
     # Specific checks for hospital_id
     hid_index = headers.index('hospital_id')
     if 'hospital_id' in file_dict:
@@ -98,14 +73,14 @@ def validate_data(headers, values, file_dict):
         if not len(hid) == 15 or hid in file_dict['hospital_id']:
             print('ERROR: hospital_id')
             return False
-
+        
     # Check for no_of_staff
     sno_index = headers.index('no_of_staff')
     sno = values[sno_index]
     if 'no_of_staff' in file_dict and not int(sno) > 0:
         print('ERROR: no_of_staff')
         return False
-
+    
     # Check for no_of_patients, male_patients, female_patients
     pno_index = headers.index('no_of_patients')
     mpno_index = headers.index('male_patients')
@@ -114,14 +89,14 @@ def validate_data(headers, values, file_dict):
     if 'no_of_patients' in file_dict and (not (int(pno) > 0 and int(mpno) > 0 and int(fpno) > 0) or int(pno) != int(mpno) + int(fpno)):
         print('ERROR: no_of_patients')
         return False
-
+    
     # Check for no_of_beds
     bno_index = headers.index('no_of_beds')
     bno = values[bno_index]
     if 'no_of_beds' in file_dict and not int(bno) > 0:
         print('ERROR: no_of_beds')
         return False
-
+    
     # Check for no_of_deaths_in_2022 and no_of_deaths_in_2023
     dno22_index = headers.index('no_of_deaths_in_2022')
     dno23_index = headers.index('no_of_deaths_in_2023')
@@ -129,10 +104,14 @@ def validate_data(headers, values, file_dict):
     if 'no_of_deaths_in_2022' in file_dict and 'no_of_deaths_in_2023' in file_dict and (not (int(dno22) > 0 and int(dno23) > 0)):
         print('ERROR: no_of_deaths')
         return False
-
+    
+    # If there is no issues, returns True
     return True
 
+
 '''Mathematical finctions'''
+
+
 # Cosine similarity
 def get_cosine(set_x: list, set_y: list) -> float:
     numerator, denumerator = 0, 0
@@ -162,5 +141,6 @@ def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
 
 
 '''Temp Test'''
+
 
 print(main('Project2/hospital_data.csv', 'Project2/disease.txt'))
