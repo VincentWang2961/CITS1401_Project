@@ -22,6 +22,9 @@ def main(CSVfile: str, TXTfile: str, category: str):
     print(OP3['afghanistan']) #785004.5
     print(OP3['brunei darussalam']) #24420.5
 
+    OP4 = task4(CSVdict)
+    print(len(OP4['children']))
+    print(OP4['children']['canada']) #[3925.4, 4448, 22.0588]
 '''Task functions'''
 
 
@@ -72,6 +75,31 @@ def task3(CSV_dict: dict, category: str) -> dict:
         if not country in variance_dict:
             variance_dict.update({country: get_variance(c_hc_c_dict[country])})
     return variance_dict
+
+
+def task4(CSVdict: dict) -> dict:
+    category_country_dict = {}
+    counter_dict = {}
+
+    for category, country, female_patients, no_of_staff, death_2022, death_2023 in zip(CSVdict['hospital_category'], CSVdict['country'], CSVdict['female_patients'], CSVdict['no_of_staff'], CSVdict['no_of_deaths_in_2022'], CSVdict['no_of_deaths_in_2023']):
+        item = category+country
+        if item not in counter_dict:
+            counter_dict.update({item: [int(female_patients), 1, int(no_of_staff), int(death_2022), int(death_2023)]})
+        else:
+            counter_dict[item][0] += int(female_patients)
+            counter_dict[item][1] += 1
+            if int(no_of_staff) > counter_dict[item][2]:
+                counter_dict[item][2] = int(no_of_staff)
+            counter_dict[item][3] += int(death_2022)
+            counter_dict[item][4] += int(death_2023)
+
+    for category, country in zip(CSVdict['hospital_category'], CSVdict['country']):
+        item = category+country
+        if category not in category_country_dict:
+            category_country_dict.update({category: {}})
+        if country not in category_country_dict[category]:
+            category_country_dict[category].update({country: [counter_dict[item][0]/counter_dict[item][1], counter_dict[item][2], get_pcad(counter_dict[item][3], counter_dict[item][4])]})
+    return category_country_dict
 
 
 '''Functional functions'''
@@ -203,7 +231,7 @@ def get_variance(data_set: list) -> float:
 
 # Average Percentage Change
 def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
-    return (ave_death_2023 - ave_death_2022) / ave_death_2022
+    return round((ave_death_2023 - ave_death_2022) / ave_death_2022 * 100, 4)
 
 
 '''Temp Test'''
