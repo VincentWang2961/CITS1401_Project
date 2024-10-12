@@ -3,10 +3,11 @@
 '''Main function'''
 
 
-def main(CSVfile: str, TXTfile: str):
+def main(CSVfile: str, TXTfile: str, category: str):
     print("For test")
     CSVdict = read_csv_as_dict(CSVfile)
     CSVdict = read_txt_into_dict(CSVdict, TXTfile)
+
     OP1 = task1(CSVdict)
     print(OP1[0]['afghanistan'])
     print(OP1[1]['afghanistan'])
@@ -16,6 +17,10 @@ def main(CSVfile: str, TXTfile: str):
     print(len(OP2))
     print(OP2['afghanistan'])
     print(OP2['albania'])
+
+    OP3 = task3(CSVdict, category)
+    print(OP3['afghanistan']) #785004.5
+    print(OP3['brunei darussalam']) #24420.5
 
 '''Task functions'''
 
@@ -48,6 +53,25 @@ def task2(CSV_dict: dict, data_list: list) -> dict:
             covid_stroke_data_set = data_list[2][country]
             cosine_dict.update({country: get_cosine(death_data_set, covid_stroke_data_set)})
     return cosine_dict
+
+
+def task3(CSV_dict: dict, category: str) -> dict:
+    # Initialisation for the dicts
+    variance_dict = {}
+    c_hc_c_dict = {}
+    # Get the formated data set for the next step
+    for country, hospital_category, cancer in zip(CSV_dict['country'], CSV_dict['hospital_category'], CSV_dict['cancer']):
+        if country in c_hc_c_dict:
+            if hospital_category == category:
+                c_hc_c_dict[country].append(int(cancer))
+        else:
+            if hospital_category == category:
+                c_hc_c_dict.update({country: [int(cancer)]})
+    # Calculate for the variance
+    for country in c_hc_c_dict:
+        if not country in variance_dict:
+            variance_dict.update({country: get_variance(c_hc_c_dict[country])})
+    return variance_dict
 
 
 '''Functional functions'''
@@ -162,14 +186,20 @@ def get_cosine(set_x: list, set_y: list) -> float:
 
 # Variance
 def get_variance(data_set: list) -> float:
-    set_len = len(data_set)
-    set_mean = 0
-    numerator = 0
-    for i in range(set_len):
-        set_mean += data_set[i]
-    for i in range (set_len):
-        numerator += (data_set[i] - set_mean) ** 2
-    return numerator / (set_len - 1)
+    try:
+        set_len = len(data_set)
+        set_mean = 0
+        numerator = 0
+        # Get the mean of the set
+        for i in range(set_len):
+            set_mean += data_set[i]
+        set_mean /= set_len
+        # Culculate the numerator
+        for i in range (set_len):
+            numerator += (data_set[i] - set_mean) ** 2
+        return round(numerator / (set_len - 1), 1)
+    except:
+        return 0
 
 # Average Percentage Change
 def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
@@ -179,4 +209,4 @@ def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
 '''Temp Test'''
 
 
-main('Project2/hospital_data.csv', 'Project2/disease.txt')
+main('Project2/hospital_data.csv', 'Project2/disease.txt', 'children')
