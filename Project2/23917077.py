@@ -6,12 +6,11 @@
 def main(CSVfile: str, TXTfile: str):
     print("For test")
     CSVdict = read_csv_as_dict(CSVfile)
+    CSVdict = read_txt_into_dict(CSVdict, TXTfile)
     OP1 = task1(CSVdict)
     print(OP1[0]['afghanistan'])
     print(OP1[1]['afghanistan'])
-
-    #To finish part3 of OP1, txt file is needed
-    #print(OP1[2]['afghanistan'])
+    print(OP1[2]['afghanistan'])
 
 '''Task functions'''
 
@@ -20,13 +19,15 @@ def task1(CSVdict: dict) -> list:
     country_to_hospitals = {}
     country_to_death = {}
     country_to_covid_stroke = {}
-    for country, hospital, death in zip(CSVdict['country'], CSVdict['hospital_id'], CSVdict['no_of_deaths_in_2022']):
+    for country, hospital, death, covid, stroke in zip(CSVdict['country'], CSVdict['hospital_id'], CSVdict['no_of_deaths_in_2022'], CSVdict['covid'], CSVdict['stroke']):
         if country in country_to_hospitals:
             country_to_hospitals[country].append(hospital)
-            country_to_death[country].append(death)
+            country_to_death[country].append(int(death))
+            country_to_covid_stroke[country].append(int(covid) + int(stroke))
         else:
             country_to_hospitals.update({country: [hospital]})
-            country_to_death.update({country: [death]})
+            country_to_death.update({country: [int(death)]})
+            country_to_covid_stroke.update({country: [int(covid) + int(stroke)]})
 
     return [country_to_hospitals, country_to_death, country_to_covid_stroke]
 
@@ -107,6 +108,24 @@ def validate_data(headers, values, file_dict):
     
     # If there is no issues, returns True
     return True
+
+def read_txt_into_dict(data_dict: dict, TXTfile: str) -> dict:
+    with open(TXTfile, 'r') as open_file:
+        # Initialisation for the diseases
+        data_dict['covid'] = [None] * len(data_dict['hospital_id'])
+        data_dict['stroke'] = [None] * len(data_dict['hospital_id'])
+        data_dict['cancer'] = [None] * len(data_dict['hospital_id'])
+        for line in open_file:
+            # Create the list and dict or each row in TXT file
+            element = [i.split(':') for i in line.lower().strip().split(', ')]
+            element_dict = {element[i][0]: element[i][1].strip() for i in range(len(element))}
+            # Insert the TXT data into the main dict
+            if element_dict['hospital_id'] in data_dict['hospital_id']:
+                index = data_dict['hospital_id'].index(element_dict['hospital_id'])
+                data_dict['covid'][index] = element_dict['covid']
+                data_dict['stroke'][index] = element_dict['stroke']
+                data_dict['cancer'][index] = element_dict['cancer']
+    return data_dict
 
 
 '''Mathematical finctions'''

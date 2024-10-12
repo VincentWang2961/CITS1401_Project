@@ -240,4 +240,3 @@ country:cyprus, hospital_id: ebcf126fe9fdead, Covid: 3834, Stroke: 2004, Cancer:
 country:cyprus, hospital_id: 1c1bc158dee046b, Covid: 930, Stroke: 4907, Cancer: 1920
 country:czech republic, hospital_id: f8bd41b97f5e96a, Covid: 2614, Stroke: 1158, Cancer: 590
 country:czech republic, hospital_id: 0aded4af925c9ec, Covid: 1540, Stroke: 4913, Cancer: 4169
-
