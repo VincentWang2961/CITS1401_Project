@@ -12,13 +12,20 @@ def main(CSVfile: str, TXTfile: str):
     print(OP1[1]['afghanistan'])
     print(OP1[2]['afghanistan'])
 
+    OP2 = task2(CSVdict, OP1)
+    print(len(OP2))
+    print(OP2['afghanistan'])
+    print(OP2['albania'])
+
 '''Task functions'''
 
 
 def task1(CSVdict: dict) -> list:
+    # Initialisation for each dict
     country_to_hospitals = {}
     country_to_death = {}
     country_to_covid_stroke = {}
+    # Update or append data into the dict
     for country, hospital, death, covid, stroke in zip(CSVdict['country'], CSVdict['hospital_id'], CSVdict['no_of_deaths_in_2022'], CSVdict['covid'], CSVdict['stroke']):
         if country in country_to_hospitals:
             country_to_hospitals[country].append(hospital)
@@ -28,9 +35,19 @@ def task1(CSVdict: dict) -> list:
             country_to_hospitals.update({country: [hospital]})
             country_to_death.update({country: [int(death)]})
             country_to_covid_stroke.update({country: [int(covid) + int(stroke)]})
-
     return [country_to_hospitals, country_to_death, country_to_covid_stroke]
 
+
+def task2(CSV_dict: dict, data_list: list) -> dict:
+    cosine_dict = {}
+    death_data_set = []
+    covid_stroke_data_set = []
+    for country in CSV_dict['country']:
+        if not country in cosine_dict:
+            death_data_set = data_list[1][country]
+            covid_stroke_data_set = data_list[2][country]
+            cosine_dict.update({country: get_cosine(death_data_set, covid_stroke_data_set)})
+    return cosine_dict
 
 
 '''Functional functions'''
@@ -141,7 +158,7 @@ def get_cosine(set_x: list, set_y: list) -> float:
         denumerator1 += set_x[i] ** 2
         denumerator2 += set_y[i] ** 2
     denumerator = (denumerator1 ** 0.5) * (denumerator2 ** 0.5)
-    return numerator / denumerator
+    return round(numerator / denumerator, 4)
 
 # Variance
 def get_variance(data_set: list) -> float:
@@ -162,4 +179,4 @@ def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
 '''Temp Test'''
 
 
-print(main('Project2/hospital_data.csv', 'Project2/disease.txt'))
+main('Project2/hospital_data.csv', 'Project2/disease.txt')
