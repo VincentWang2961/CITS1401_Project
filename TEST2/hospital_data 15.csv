@@ -243,8 +243,8 @@ czech republic,0aded4af925c9ec,1644,6572,269,6303,2626,children,79,94
 ,1ba52b87bb6a32f,679,6819,87,6732,3419,children,2,5
 12345,1a907c2acbc34ba,200,2090,134,1956,316,children,15,30
 ,,,,,,,,,
-afghanistan,2ba52b87bb6a32f,,6819,87,6732,3419,children,2,5
-canada,2a907c2acbc34ba,-200,2090,134,1956,316,children,15,30
+afghanistan,2ba52b87bb6a32f,-1,-6819,-87,-6732,-3419,children,2,5
+canada,2a907c2acbc34ba,-200,-2090,-134,-1956,-316,children,15,30
 ,,,,,,,,,
 afghanistan,3ba52b87bb6a32f,679,0,87,6732,3419,children,2,5
 canada,3a907c2acbc34ba,200,,134,1956,316,children,15,30

@@ -24,10 +24,11 @@ def main(CSVfile: str, TXTfile: str, category: str):
     data_dict = read_txt_into_dict(data_dict, TXTfile)
 
     # Return empty list and dicts if there is no valid or necessary info in the files
-    first_value = list(data_dict.values())[0][0]
-    if len(data_dict) <= 0 or not first_value or 'country' not in data_dict:
+    if not len(data_dict) >= 2 or 'country' not in data_dict:
         return OP1, OP2, OP3, OP4
-
+    first_value = list(data_dict.values())[0][0]
+    if not first_value:
+        return OP1, OP2, OP3, OP4
     OP1 = generate_country_specific_health_data(data_dict)
     OP2 = calculate_cosine_similarity(data_dict, OP1)
     OP3 = calculate_cancer_admission_variance(data_dict, category)
@@ -170,63 +171,66 @@ def read_csv_as_dict(file: str) -> dict:
 
 
 # Function that validate a single line data in a dict 
+# 1. Length of values is must as same as length of header
+# 2. Every single value need havs a true value not None or ''
+# 3. Country and category must contain no numeric value
+# 4. Hospital ID must has 15 length and unique
+# 5. Number of staff is must a positive integer numeric value
+# 6. Number of patients and also male and female are must positive integer numeric value
+# 7. Number of beds is must a positive integer numeric value
+# 8. Number of death in 2022 and in 2023 are must positive integer numeric value
 def validate_data(headers: list, values: list, file_dict: dict) -> bool:
     # Convert headers and values into a dictionary
     line = dict(zip(headers, values))
-
     # Check for correct length of values as the header's
     if not len(values) == len(headers):
         return False
-    
+    # Check for country and category
     cty = line.get('country')
     if 'country' in file_dict:
         if not cty or any(char.isdigit() for char in cty):
             return False
-
     cat = line.get('hospital_category')
     if 'hospital_category' in file_dict:
         if not cat or any(char.isdigit() for char in cat):
             return False
-
     # Specific checks for hospital_id
     if 'hospital_id' in file_dict:
         hid = line.get('hospital_id')
         if not len(hid) == 15 or hid in file_dict['hospital_id']:
             return False
-        
     # Check for no_of_staff
     if 'no_of_staff' in file_dict:
         sno = line.get('no_of_staff')
         if not sno.isdigit() or not int(sno) > 0:
             return False
-    
     # Check for no_of_patients, male_patients, female_patients
     if 'no_of_patients' in file_dict:
         pno = line['no_of_patients']
         if not pno.isdigit() or not int(pno) > 0:
             return False
-        if 'male_patients' in file_dict:
-            mpno = line['male_patients']
-            if not mpno.isdigit() or not int(mpno) > 0:
-                return False
-        if 'female_patients' in file_dict:
-            fpno = line['female_patients']
-            if not fpno.isdigit() or not int(fpno) > 0:
-                return False
-    
+    if 'male_patients' in file_dict:
+        mpno = line['male_patients']
+        if not mpno.isdigit() or not int(mpno) > 0:
+            return False
+    if 'female_patients' in file_dict:
+        fpno = line['female_patients']
+        if not fpno.isdigit() or not int(fpno) > 0:
+            return False
     # Check for no_of_beds
     if 'no_of_beds' in file_dict:
         bno = line.get('no_of_beds')
         if not bno.isdigit() or not int(bno) > 0:
             return False
-    
     # Check for no_of_deaths_in_2022 and no_of_deaths_in_2023
-    if 'no_of_deaths_in_2022' in file_dict and 'no_of_deaths_in_2023' in file_dict:
+    if 'no_of_deaths_in_2022' in file_dict:
         dno22 = line['no_of_deaths_in_2022']
-        dno23 = line['no_of_deaths_in_2023']
-        if not dno22.isdigit() and not dno23.isdigit() and not (int(dno22) > 0 or int(dno23) > 0):
+        if not dno22.isdigit() or not int(dno22) > 0:
             return False
-    
+    if 'no_of_deaths_in_2023' in file_dict:
+        dno23 = line['no_of_deaths_in_2023']
+        if not dno23.isdigit() or not int(dno23) > 0:
+            return False
     # If there is no issues, returns True
     return True
 
