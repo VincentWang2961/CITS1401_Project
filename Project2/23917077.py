@@ -23,7 +23,9 @@ def main(CSVfile: str, TXTfile: str, category: str):
     data_dict = read_csv_as_dict(CSVfile)
     data_dict = read_txt_into_dict(data_dict, TXTfile)
 
-    if 'country' not in data_dict:
+    # Return empty list and dicts if there is no valid or necessary info in the files
+    first_value = list(data_dict.values())[0][0]
+    if len(data_dict) <= 0 or not first_value or 'country' not in data_dict:
         return OP1, OP2, OP3, OP4
 
     OP1 = generate_country_specific_health_data(data_dict)
@@ -43,10 +45,10 @@ def generate_country_specific_health_data(data_dict: dict) -> list:
     country_to_hospitals = {}
     country_to_death = {}
     country_to_covid_stroke = {}
-    # Header check
     country_list = data_dict['country']
     hospital_list = [None]*len(country_list)
     death_list, covid_list, stroke_list = [[0]*len(country_list) for _ in range(3)]
+    # Header check
     if 'hospital_id' in data_dict:
         hospital_list = data_dict['hospital_id']
     if 'no_of_deaths_in_2022' in data_dict:
@@ -176,14 +178,14 @@ def validate_data(headers: list, values: list, file_dict: dict) -> bool:
     if not len(values) == len(headers):
         return False
     
+    cty = line.get('country')
     if 'country' in file_dict:
-        cty = line.get('country')
-        if all(cha.isdigit() for cha in cty):
+        if not cty or any(char.isdigit() for char in cty):
             return False
-        
+
+    cat = line.get('hospital_category')
     if 'hospital_category' in file_dict:
-        cat = line.get('hospital_category')
-        if all(cha.isdigit() for cha in cat):
+        if not cat or any(char.isdigit() for char in cat):
             return False
 
     # Specific checks for hospital_id
@@ -308,115 +310,115 @@ def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
 '''Temp Test'''
 
 
-#OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Project2/hospital_data.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Project2/disease.txt', 'children')
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/hospital_data 11.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/disease 1.txt', 'children')
+# OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Project2/hospital_data.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Project2/disease.txt', 'children')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/hospital_data 15.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/disease 1.txt', 'children')
 
-# print(OP1[0]['afghanistan']) #['4eb9d3e5cf79b91', 'bba52b87bb6a32f','8a9190a50adf241']
-# print(OP1[1]['afghanistan']) #[20, 2, 12]
-# print(OP1[2]['afghanistan']) #[830, 3898, 6854]
+print(OP1[0]['afghanistan']) #['4eb9d3e5cf79b91', 'bba52b87bb6a32f','8a9190a50adf241']
+print(OP1[1]['afghanistan']) #[20, 2, 12]
+print(OP1[2]['afghanistan']) #[830, 3898, 6854]
 
-# print(len(OP2)) #32
-# print(OP2['afghanistan']) #0.5746
-# print(OP2['albania']) #0.9257
+print(len(OP2)) #32
+print(OP2['afghanistan']) #0.5746
+print(OP2['albania']) #0.9257
 
-# print(OP3['afghanistan']) #785004.5
-# print(OP3['brunei darussalam']) #24420.5
+print(OP3['afghanistan']) #785004.5
+print(OP3['brunei darussalam']) #24420.5
 
-# print(len(OP4['children'])) #32
-# print(OP4['children']['canada']) #[3925.4, 4448, 22.0588]
+print(len(OP4['children'])) #32
+print(OP4['children']['canada']) #[3925.4, 4448, 22.0588]
 
-# #print(OP1)
-# #print(OP2)
-# #print(OP3)
-# #print(OP4)
+# print(OP1)
+# print(OP2)
+# print(OP3)
+# print(OP4)
 
-# if OP1[0]['afghanistan'] == ['4eb9d3e5cf79b91', 'bba52b87bb6a32f','8a9190a50adf241'] and OP1[1]['afghanistan'] == [20, 2, 12] and OP1[2]['afghanistan'] == [830, 3898, 6854]:
-#     if len(OP2) == 32 and OP2['afghanistan'] == 0.5746 and OP2['albania'] == 0.9257:
-#         if OP3['afghanistan'] == 785004.5 and OP3['brunei darussalam'] == 24420.5:
-#             if len(OP4['children']) == 32 and OP4['children']['canada'] == [3925.4, 4448, 22.0588]:
-#                 print('PASSED ALL')
+if OP1[0]['afghanistan'] == ['4eb9d3e5cf79b91', 'bba52b87bb6a32f','8a9190a50adf241'] and OP1[1]['afghanistan'] == [20, 2, 12] and OP1[2]['afghanistan'] == [830, 3898, 6854]:
+    if len(OP2) == 32 and OP2['afghanistan'] == 0.5746 and OP2['albania'] == 0.9257:
+        if OP3['afghanistan'] == 785004.5 and OP3['brunei darussalam'] == 24420.5:
+            if len(OP4['children']) == 32 and OP4['children']['canada'] == [3925.4, 4448, 22.0588]:
+                print('PASSED ALL')
 
 
-#Testing first sample output as provided in the project sheet.
+# #Testing first sample output as provided in the project sheet.
 
-OP1A={'4eb9d3e5cf79b91': (20, 830), 'bba52b87bb6a32f':(2,3898), '8a9190a50adf241': (12, 6854)}
-SOL={}
-for i in range(len(OP1[0]['afghanistan'])):
-    SOL[OP1[0]['afghanistan'][i]]=(OP1[1]['afghanistan'][i], OP1[2]['afghanistan'][i])
+# OP1A={'4eb9d3e5cf79b91': (20, 830), 'bba52b87bb6a32f':(2,3898), '8a9190a50adf241': (12, 6854)}
+# SOL={}
+# for i in range(len(OP1[0]['afghanistan'])):
+#     SOL[OP1[0]['afghanistan'][i]]=(OP1[1]['afghanistan'][i], OP1[2]['afghanistan'][i])
 
-flag = True
-if len(SOL) != len(OP1A):
-    flag = False
-for k, v in SOL.items():
-    if v!= OP1A[k]:
-        flag = False
+# flag = True
+# if len(SOL) != len(OP1A):
+#     flag = False
+# for k, v in SOL.items():
+#     if v!= OP1A[k]:
+#         flag = False
 
-# Checking for 'brunei darussalam'
+# # Checking for 'brunei darussalam'
 
-OP1A={'9dd10a3ccb2b1bd':(342,3141), 'e84e97db7bfaded':(110, 4955), 'df39abf66ae4d0c':(816,3096),
-       '6b345d487edf9df':(548,2804)}
-SOL={}
+# OP1A={'9dd10a3ccb2b1bd':(342,3141), 'e84e97db7bfaded':(110, 4955), 'df39abf66ae4d0c':(816,3096),
+#        '6b345d487edf9df':(548,2804)}
+# SOL={}
 
-for i in range(len(OP1[0]['brunei darussalam'])):
-    SOL[OP1[0]['brunei darussalam'][i]]=(OP1[1]['brunei darussalam'][i], OP1[2]['brunei darussalam'][i])
+# for i in range(len(OP1[0]['brunei darussalam'])):
+#     SOL[OP1[0]['brunei darussalam'][i]]=(OP1[1]['brunei darussalam'][i], OP1[2]['brunei darussalam'][i])
 
-flag = True
-if len(SOL) != len(OP1A):
-    flag = False
+# flag = True
+# if len(SOL) != len(OP1A):
+#     flag = False
 
-for k, v in SOL.items():
-    if v!= OP1A[k]:
-        flag = False
+# for k, v in SOL.items():
+#     if v!= OP1A[k]:
+#         flag = False
 
-print(flag)
+# print(flag)
 
-#===== Testing OP2 ======================
-OP2A={'afghanistan': 0.5746, 'albania': 0.9257, 'algeria': 0.7834, 'angola': 0.9006, 'anguilla': 0.9727, 'argentina': 0.8543,
-       'australia': 0.9705, 'austria': 0.9129, 'bahamas': 0.7984, 'bahrain': 0.8996, 'bangladesh': 0.9597,
-       'botswana': 0.6816, 'brazil': 0.8658, 'brunei darussalam': 0.7539, 'bulgaria': 0.7173, 'cambodia': 0.774,
-       'cameroon': 0.824, 'canada': 0.8057, 'chile': 0.9332, 'colombia': 0.9665,
-       'comoros': 0.7758,
-       'croatia': 0.8881, 'cuba': 0.91, 'cyprus': 0.9184, 'czech republic': 0.9258}
-flag = True
+# #===== Testing OP2 ======================
+# OP2A={'afghanistan': 0.5746, 'albania': 0.9257, 'algeria': 0.7834, 'angola': 0.9006, 'anguilla': 0.9727, 'argentina': 0.8543,
+#        'australia': 0.9705, 'austria': 0.9129, 'bahamas': 0.7984, 'bahrain': 0.8996, 'bangladesh': 0.9597,
+#        'botswana': 0.6816, 'brazil': 0.8658, 'brunei darussalam': 0.7539, 'bulgaria': 0.7173, 'cambodia': 0.774,
+#        'cameroon': 0.824, 'canada': 0.8057, 'chile': 0.9332, 'colombia': 0.9665,
+#        'comoros': 0.7758,
+#        'croatia': 0.8881, 'cuba': 0.91, 'cyprus': 0.9184, 'czech republic': 0.9258}
+# flag = True
 
-for k, v in OP2A.items():
-    if v!= OP2[k]:
-       flag = False
+# for k, v in OP2A.items():
+#     if v!= OP2[k]:
+#        flag = False
 
-print(flag)
+# print(flag)
 
-#===== Testing OP3
-OP3A={'afghanistan': 785004.5, 'albania': 333744.5, 'algeria': 464089.6667, 'angola': 1155440.3333,
-      'anguilla': 42585.3333, 'argentina': 721126.25, 'australia': 1296050.0, 'austria': 1249656.3333,
-      'bahamas': 2818081.3333, 'bahrain': 2504775.0, 'bangladesh': 83232.0,
-      'botswana': 1853238.9167, 'brazil': 281384.25, 'brunei darussalam': 24420.5, 'bulgaria': 959586.3333,
-      'cambodia': 2133494.9167, 'cameroon': 371522.0, 'canada': 1666486.3,
-      'chile': 2554.3333, 'colombia': 1386758.3333,
-      'comoros': 541985.3333,
-      'croatia': 4845384.5, 'cuba': 744857.3333, 'cyprus': 1952581.0, 'czech republic': 6404620.5}
+# #===== Testing OP3
+# OP3A={'afghanistan': 785004.5, 'albania': 333744.5, 'algeria': 464089.6667, 'angola': 1155440.3333,
+#       'anguilla': 42585.3333, 'argentina': 721126.25, 'australia': 1296050.0, 'austria': 1249656.3333,
+#       'bahamas': 2818081.3333, 'bahrain': 2504775.0, 'bangladesh': 83232.0,
+#       'botswana': 1853238.9167, 'brazil': 281384.25, 'brunei darussalam': 24420.5, 'bulgaria': 959586.3333,
+#       'cambodia': 2133494.9167, 'cameroon': 371522.0, 'canada': 1666486.3,
+#       'chile': 2554.3333, 'colombia': 1386758.3333,
+#       'comoros': 541985.3333,
+#       'croatia': 4845384.5, 'cuba': 744857.3333, 'cyprus': 1952581.0, 'czech republic': 6404620.5}
 
-flag = True
+# flag = True
 
-for k, v in OP3A.items():
-    if v!= OP3[k]:
-       flag = False
+# for k, v in OP3A.items():
+#     if v!= OP3[k]:
+#        flag = False
 
-print(flag)
+# print(flag)
 
-#===== Testing OP4==============
-OP4A=[3925.4, 4448, 22.0588]
-OP4B=[4844.0, 3945, 26.5487]
-OP4C=[0,0,0]
+# #===== Testing OP4==============
+# OP4A=[3925.4, 4448, 22.0588]
+# OP4B=[4844.0, 3945, 26.5487]
+# OP4C=[0,0,0]
 
-flag = True
-if len(OP4['children']['canada']) != len(OP4A):
-    flag = False
-elif OP4A!= OP4['children']['canada']:
-    flag = False
-elif len(OP4['children']['croatia']) != len(OP4B):
-    flag = False
-elif OP4B!= OP4['children']['croatia']:
-    flag = False
-else:
-    pass
-print(flag)
+# flag = True
+# if len(OP4['children']['canada']) != len(OP4A):
+#     flag = False
+# elif OP4A!= OP4['children']['canada']:
+#     flag = False
+# elif len(OP4['children']['croatia']) != len(OP4B):
+#     flag = False
+# elif OP4B!= OP4['children']['croatia']:
+#     flag = False
+# else:
+#     pass
+# print(flag)
