@@ -1,9 +1,4 @@
 country,hospital_ID,no_of_staff,no_of_patients,male_patients,female_patients,no_of_beds,hospital_category,No_of_deaths_in_2022,No_of_deaths_in_2023
-
-
-
-
-
 afghanistan,4eb9d3e5cf79b91,10,730,177,553,336,research,20,50
 afghanistan,bba52b87bb6a32f,679,6819,87,6732,3419,children,2,5
 afghanistan,8a9190a50adf241,111,3695,255,3440,1445,children,12,5
@@ -57,11 +52,6 @@ argentina,af3b0dc3a779eb5,3248,7898,105,7793,4429,psychiatric,106,121
 argentina,ee2d54f3ad9c126,96,313,84,229,164,teaching,20,35
 argentina,f40fc5a648c53f3,1330,6515,288,6227,5142,children,23,38
 australia,e9bebd37bfee7bb,776,7597,190,7407,1370,rehabilitation,26,41
-
-
-
-
-
 australia,6f8e7fe3ccfcb7c,3133,7640,267,7373,4673,general,119,134
 australia,4d17fa0d985e0d7,2916,5942,222,5720,3722,speciality,142,157
 australia,6be8a1ef720fd32,3330,8323,223,8100,5723,psychiatric,145,160
@@ -251,8 +241,3 @@ cyprus,ebcf126fe9fdead,440,9283,286,8997,773,children,118,133
 cyprus,1c1bc158dee046b,2129,8147,14,8133,5505,psychiatric,101,116
 czech republic,f8bd41b97f5e96a,166,8263,265,7998,201,children,103,118
 czech republic,0aded4af925c9ec,1644,6572,269,6303,2626,children,79,94
-
-
-
-
-

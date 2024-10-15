@@ -1,5 +1,5 @@
-country,hospital_ID,no_of_staff,no_of_patients,male_patients,female_patients,no_of_beds,hospital_category,No_of_deaths_in_2022,No_of_deaths_in_2023
-afghanistan,4eb9d3e5cf79b91,10,730,177,553,336,research,20,50
+country,hospital_ID,no_of_staff,no_of_patients,male_patients,female_patients,no_of_beds,hospital_category,No_of_deaths_in_2022,No_of_deaths_in_2023,extracolomn
+afghanistan,4eb9d3e5cf79b91,10,730,177,553,336,research,20,50,uselessdata
 afghanistan,bba52b87bb6a32f,679,6819,87,6732,3419,children,2,5
 afghanistan,8a9190a50adf241,111,3695,255,3440,1445,children,12,5
 albania,3d41753aadac2fb,290,956,88,868,444,children,4,23
@@ -157,7 +157,7 @@ cameroon,19d7de485e79df6,651,5594,266,5328,4646,children,125,140
 cameroon,3c6fd0d86e7baaf,5,404,57,347,285,children,51,66
 cameroon,8c4d487cabce6e9,361,1740,299,1441,581,teaching,70,85
 canada,3851f381ea54d70,4448,6765,207,6558,6356,children,142,157
-canada,a0bbb5ab97fe257,203,1310,232,1078,501,children,64,79
+canada,a0bbb5ab97fe257,203,1310,232,1078,501,children,64,79,114514
 canada,54fa48043aaacd4,140,3118,73,3045,515,rehabilitation,90,105
 canada,0d2d0dc2ddb267c,10,28,50,22,10,standalone_emergency,45,60
 canada,60a7985f64acbaf,19,4679,212,4467,694,research,52,67

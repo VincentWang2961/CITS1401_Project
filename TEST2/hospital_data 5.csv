@@ -1,5 +1,11 @@
 country,hospital_ID,no_of_staff,no_of_patients,male_patients,female_patients,no_of_beds,hospital_category,No_of_deaths_in_2022,No_of_deaths_in_2023
 afghanistan,4eb9d3e5cf79b91,10,730,177,553,336,research,20,50
+afghanistan,4eb9d3e5cf79b91,-10,730,177,553,336,research,20,50
+afghanistan,4eb9d3e5cf79b91,10,-730,177,553,336,research,20,50
+afghanistan,4eb9d3e5cf79b91,10,730,-177,553,336,research,20,50
+afghanistan,4eb9d3e5cf79b91,10,730,177,-553,336,research,20,50
+afghanistan,4eb9d3e5cf79b91,10,730,177,553,-336,research,20,50
+afghanistan,4eb9d3e5cf79b91,0,730,177,553,336,research,20,50
 afghanistan,bba52b87bb6a32f,679,6819,87,6732,3419,children,2,5
 afghanistan,8a9190a50adf241,111,3695,255,3440,1445,children,12,5
 albania,3d41753aadac2fb,290,956,88,868,444,children,4,23

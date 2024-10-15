@@ -13,54 +13,59 @@ Date: 13 Oct 2024
 
 
 def main(CSVfile: str, TXTfile: str, category: str):
-    print("For test")
-    CSVdict = read_csv_as_dict(CSVfile)
-    CSVdict = read_txt_into_dict(CSVdict, TXTfile)
+    
+    data_dict = read_csv_as_dict(CSVfile)
+    data_dict = read_txt_into_dict(data_dict, TXTfile)
 
-    OP1 = task1(CSVdict)
-    OP2 = task2(CSVdict, OP1)
-    OP3 = task3(CSVdict, category)
-    OP4 = task4(CSVdict)
+    OP1 = generate_country_specific_health_data(data_dict)
+    OP2 = calculate_cosine_similarity(data_dict, OP1)
+    OP3 = calculate_cancer_admission_variance(data_dict, category)
+    OP4 = generate_hospital_category_statistics(data_dict)
 
     return OP1, OP2, OP3, OP4
 
 
 '''Task functions'''
 
-
-def task1(CSVdict: dict) -> list:
+# TASK1: Generate Country-Specific Hospital Data
+def generate_country_specific_health_data(data_dict: dict) -> list:
     # Initialisation for each dict
     country_to_hospitals = {}
     country_to_death = {}
     country_to_covid_stroke = {}
+    # If country not exists
+    if 'country' not in data_dict:
+        return [country_to_hospitals, country_to_death, country_to_covid_stroke]
     # Setdefault and append all values
-    for country, hospital, death, covid, stroke in zip(CSVdict['country'], CSVdict['hospital_id'], CSVdict['no_of_deaths_in_2022'], CSVdict['covid'], CSVdict['stroke']):
+    for country, hospital, death, covid, stroke in zip(data_dict['country'], data_dict['hospital_id'], data_dict['no_of_deaths_in_2022'], data_dict['covid'], data_dict['stroke']):
         country_to_hospitals.setdefault(country, []).append(hospital)
         country_to_death.setdefault(country, []).append(int(death))
         country_to_covid_stroke.setdefault(country, []).append(int(covid) + int(stroke))
     return [country_to_hospitals, country_to_death, country_to_covid_stroke]
 
 
-def task2(CSV_dict: dict, data_list: list) -> dict:
+# TASK2: Calculate Cosine Similarity
+def calculate_cosine_similarity(data_dict: dict, data_list: list) -> dict:
     # Initialisation for each dict and list
     cosine_dict = {}
     death_data_set = []
     covid_stroke_data_set = []
     # Pass the value from OP1 to get_cosine function, and put returned value into the dict
-    for country in CSV_dict['country']:
+    for country in data_dict['country']:
         if not country in cosine_dict:
             death_data_set = data_list[1][country]
             covid_stroke_data_set = data_list[2][country]
-            cosine_dict[country] = get_cosine(death_data_set, covid_stroke_data_set)
+            cosine_dict[country] = round(get_cosine(death_data_set, covid_stroke_data_set), 4)
     return cosine_dict
 
 
-def task3(CSV_dict: dict, category: str) -> dict:
+# TASK3: Analyze Variance in Cancer Admissions
+def calculate_cancer_admission_variance(data_dict: dict, category: str) -> dict:
     # Initialisation for the dicts
     variance_dict = {}
     c_hc_c_dict = {}
     # Get the formated data set for the next step
-    for country, hospital_category, cancer in zip(CSV_dict['country'], CSV_dict['hospital_category'], CSV_dict['cancer']):
+    for country, hospital_category, cancer in zip(data_dict['country'], data_dict['hospital_category'], data_dict['cancer']):
         if hospital_category == category:
             c_hc_c_dict.setdefault(country, []).append(int(cancer))
     # Calculate the cancer variance
@@ -68,12 +73,12 @@ def task3(CSV_dict: dict, category: str) -> dict:
         variance_dict[country] = get_variance(cancers)
     return variance_dict
 
-
-def task4(CSVdict: dict) -> dict:
+# TASK4: Generate Hospital Category Statistics
+def generate_hospital_category_statistics(data_dict: dict) -> dict:
     category_country_dict = {}
     counter_dict = {}
     # Collect and aggregate data
-    for category, country, female_patients, no_of_staff, death_2022, death_2023 in zip(CSVdict['hospital_category'], CSVdict['country'], CSVdict['female_patients'], CSVdict['no_of_staff'], CSVdict['no_of_deaths_in_2022'], CSVdict['no_of_deaths_in_2023']):
+    for category, country, female_patients, no_of_staff, death_2022, death_2023 in zip(data_dict['hospital_category'], data_dict['country'], data_dict['female_patients'], data_dict['no_of_staff'], data_dict['no_of_deaths_in_2022'], data_dict['no_of_deaths_in_2023']):
         item = category + country
         if item not in counter_dict:
             counter_dict[item] = [int(female_patients), 1, int(no_of_staff), int(death_2022), int(death_2023)]
@@ -85,12 +90,12 @@ def task4(CSVdict: dict) -> dict:
             data[3] += int(death_2022)
             data[4] += int(death_2023)
     # Calculate the needed data
-    for category, country in zip(CSVdict['hospital_category'], CSVdict['country']):
+    for category, country in zip(data_dict['hospital_category'], data_dict['country']):
         item = category + country
         data = counter_dict[item]
         avg_patients = data[0] / data[1]
         max_staff = data[2]
-        pcad = get_pcad(data[3], data[4])
+        pcad = round(get_pcad(data[3], data[4]), 4)
         category_country_dict.setdefault(category, {}).update({
             country: [avg_patients, max_staff, pcad]
         })
@@ -100,7 +105,7 @@ def task4(CSVdict: dict) -> dict:
 '''Functional functions'''
 
 
-# Read file as dict
+# Function that read a CSV file and make a dict by header
 def read_csv_as_dict(file: str) -> dict:
     # Create the fict
     file_dict = {}
@@ -118,61 +123,62 @@ def read_csv_as_dict(file: str) -> dict:
     return file_dict
 
 
-# Data washing/validating
+# Function that validate a single line data in a dict 
 def validate_data(headers: list, values: list, file_dict: dict) -> bool:
+    # Convert headers and values into a dictionary
+    line = dict(zip(headers, values))
+
+    # Check for None and '' value
+    
+
     # Check for correct length of values as the header's
     if not len(values) == len(headers):
         print('ERROR: Length')
         return False
     
-    # Check for empty values
-    if '' in values:
-        print('ERROR: None Value')
-        return False
-    
     # Specific checks for hospital_id
-    hid_index = headers.index('hospital_id')
     if 'hospital_id' in file_dict:
-        hid = values[hid_index]
+        hid = line.get('hospital_id')
         if not len(hid) == 15 or hid in file_dict['hospital_id']:
             print('ERROR: hospital_id')
             return False
         
     # Check for no_of_staff
-    sno_index = headers.index('no_of_staff')
-    sno = values[sno_index]
-    if 'no_of_staff' in file_dict and not int(sno) > 0:
-        print('ERROR: no_of_staff')
-        return False
+    if 'no_of_staff' in file_dict:
+        sno = line.get('no_of_staff')
+        if not int(sno) > 0:
+            print('ERROR: no_of_staff')
+            return False
     
     # Check for no_of_patients, male_patients, female_patients
-    pno_index = headers.index('no_of_patients')
-    mpno_index = headers.index('male_patients')
-    fpno_index = headers.index('female_patients')
-    pno, mpno, fpno = values[pno_index], values[mpno_index], values[fpno_index]
-    if 'no_of_patients' in file_dict and (not (int(pno) > 0 and int(mpno) > 0 and int(fpno) > 0) or int(pno) != int(mpno) + int(fpno)):
-        print('ERROR: no_of_patients')
-        return False
+    if 'no_of_patients' in file_dict:
+        pno = int(line['no_of_patients'])
+        mpno = int(line['male_patients'])
+        fpno = int(line['female_patients'])
+        if not (pno > 0 or mpno > 0 or fpno > 0 or pno >= mpno + fpno):
+            print('ERROR: no_of_patients')
+            return False
     
     # Check for no_of_beds
-    bno_index = headers.index('no_of_beds')
-    bno = values[bno_index]
-    if 'no_of_beds' in file_dict and not int(bno) > 0:
-        print('ERROR: no_of_beds')
-        return False
+    if 'no_of_beds' in file_dict:
+        bno = line.get('no_of_beds')
+        if not int(bno) > 0:
+            print('ERROR: no_of_beds')
+            return False
     
     # Check for no_of_deaths_in_2022 and no_of_deaths_in_2023
-    dno22_index = headers.index('no_of_deaths_in_2022')
-    dno23_index = headers.index('no_of_deaths_in_2023')
-    dno22, dno23 = values[dno22_index], values[dno23_index]
-    if 'no_of_deaths_in_2022' in file_dict and 'no_of_deaths_in_2023' in file_dict and (not (int(dno22) > 0 and int(dno23) > 0)):
-        print('ERROR: no_of_deaths')
-        return False
+    if 'no_of_deaths_in_2022' in file_dict and 'no_of_deaths_in_2023' in file_dict:
+        dno22 = int(line['no_of_deaths_in_2022'])
+        dno23 = int(line['no_of_deaths_in_2023'])
+        if not (dno22 > 0 or dno23 > 0):
+            print('ERROR: no_of_deaths')
+            return False
     
     # If there is no issues, returns True
     return True
 
 
+# Function that read the txt data into the exist dict
 def read_txt_into_dict(data_dict: dict, TXTfile: str) -> dict:
     # Make a index map for hospoital ids
     index_map = {hid: index for index, hid in enumerate(data_dict['hospital_id'])}
@@ -200,15 +206,18 @@ def read_txt_into_dict(data_dict: dict, TXTfile: str) -> dict:
 
 # Cosine similarity
 def get_cosine(set_x: list, set_y: list) -> float:
-    numerator, denumerator = 0, 0
-    denumerator1, denumerator2 = 0, 0
-    set_len = len(set_x)
-    for i in range(set_len):
-        numerator += set_x[i] * set_y[i]
-        denumerator1 += set_x[i] ** 2
-        denumerator2 += set_y[i] ** 2
-    denumerator = (denumerator1 ** 0.5) * (denumerator2 ** 0.5)
-    return round(numerator / denumerator, 4)
+    try:
+        numerator, denumerator = 0, 0
+        denumerator1, denumerator2 = 0, 0
+        set_len = len(set_x)
+        for i in range(set_len):
+            numerator += set_x[i] * set_y[i]
+            denumerator1 += set_x[i] ** 2
+            denumerator2 += set_y[i] ** 2
+        denumerator = (denumerator1 ** 0.5) * (denumerator2 ** 0.5)
+        return numerator / denumerator
+    except:
+        return 0
 
 
 # Variance
@@ -224,20 +233,23 @@ def get_variance(data_set: list) -> float:
         # Culculate the numerator
         for i in range (set_len):
             numerator += (data_set[i] - set_mean) ** 2
-        return round(numerator / (set_len - 1), 1)
+        return numerator / (set_len - 1)
     except:
         return 0
 
 
 # Average Percentage Change
 def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
-    return round((ave_death_2023 - ave_death_2022) / ave_death_2022 * 100, 4)
+    try:
+        return (ave_death_2023 - ave_death_2022) / ave_death_2022 * 100
+    except:
+        return 0
 
 
 '''Temp Test'''
 
 
-OP1, OP2, OP3, OP4 = main('Project2/hospital_data.csv', 'Project2/disease.txt', 'children')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Project2/hospital_data.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Project2/disease.txt', 'children')
 
 print(OP1[0]['afghanistan']) #['4eb9d3e5cf79b91', 'bba52b87bb6a32f','8a9190a50adf241']
 print(OP1[1]['afghanistan']) #[20, 2, 12]
@@ -258,3 +270,5 @@ if OP1[0]['afghanistan'] == ['4eb9d3e5cf79b91', 'bba52b87bb6a32f','8a9190a50adf2
         if OP3['afghanistan'] == 785004.5 and OP3['brunei darussalam'] == 24420.5:
             if len(OP4['children']) == 32 and OP4['children']['canada'] == [3925.4, 4448, 22.0588]:
                 print('PASSED ALL')
+
+print(not [' '])
