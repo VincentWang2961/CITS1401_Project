@@ -2,14 +2,19 @@
 CITS1401 Computational Thinking with Python
 Project 2, Semester 2, 2024 - Analyzing Hospital Data
 
-Tasks
+This program is designed to analyze hospital data from multiple countries, examining various key factors such as patient mortality rates, disease-specific admissions, staff numbers, and patient demographics. It reads data from CSV and TXT files and performs four main tasks:
+
+1. Generating country-specific hospital data, aggregating hospitals, deaths, and combined COVID and stroke cases per country.
+2. Calculating the cosine similarity between the number of deaths and the combined COVID and stroke cases for each country.
+3. Analyzing the variance in cancer admissions for a specified hospital category across different countries.
+4. Generating statistics for hospital categories, including average female patients per hospital, maximum number of staff, and percentage change in average deaths from 2022 to 2023.
+
+Each task is encapsulated within its own function for clarity and modularity. The program strictly adheres to the guidelines provided in the project brief, ensuring no external modules are used and all outputs are processed through basic Python constructs like lists and loops.
 
 Author: Vincent Wang(also Wenshuo Wang)
 Student ID: 23917077
-Date: 13 Oct 2024
+Date: 15 Oct 2024
 '''
-
-'''Main function'''
 
 
 def main(CSVfile: str, TXTfile: str, category: str):
@@ -31,6 +36,7 @@ def main(CSVfile: str, TXTfile: str, category: str):
 
 '''Task functions'''
 
+
 # TASK1: Generate Country-Specific Hospital Data
 def generate_country_specific_health_data(data_dict: dict) -> list:
     # Initialisation for each dict
@@ -39,7 +45,8 @@ def generate_country_specific_health_data(data_dict: dict) -> list:
     country_to_covid_stroke = {}
     # Header check
     country_list = data_dict['country']
-    hospital_list, death_list, covid_list, stroke_list = [[0]*len(country_list) for _ in range(4)]
+    hospital_list = [None]*len(country_list)
+    death_list, covid_list, stroke_list = [[0]*len(country_list) for _ in range(3)]
     if 'hospital_id' in data_dict:
         hospital_list = data_dict['hospital_id']
     if 'no_of_deaths_in_2022' in data_dict:
@@ -80,20 +87,21 @@ def calculate_cancer_admission_variance(data_dict: dict, category: str) -> dict:
     # Initialisation for the dicts
     variance_dict = {}
     c_hc_c_dict = {}
+    country_list = data_dict['country']
+    category_list = [None]*len(country_list)
+    cancer_list = [0]*len(country_list)
     # Header check
-    if 'hospital_category' not in data_dict or 'cancer' not in data_dict or category not in data_dict['hospital_category']:
-        return variance_dict
-    else:
-        country_list = data_dict['country']
+    if 'hospital_category' in data_dict and 'cancer' in data_dict and category in data_dict['hospital_category']:
         category_list = data_dict['hospital_category']
         cancer_list = data_dict['cancer']
     # Get the formated data set for the next step
     for country, hospital_category, cancer in zip(country_list, category_list, cancer_list):
+        c_hc_c_dict.setdefault(country, [])
         if hospital_category == category:
             c_hc_c_dict.setdefault(country, []).append(int(cancer))
     # Calculate the cancer variance
     for country, cancers in c_hc_c_dict.items():
-        variance_dict[country] = get_variance(cancers)
+        variance_dict[country] = round(get_variance(cancers), 4)
     return variance_dict
 
 
@@ -115,7 +123,6 @@ def generate_hospital_category_statistics(data_dict: dict) -> dict:
     if 'no_of_deaths_in_2022' in data_dict and 'no_of_deaths_in_2023' in data_dict:
         death22_list = data_dict['no_of_deaths_in_2022']
         death23_list = data_dict['no_of_deaths_in_2023']
-
     # Collect and aggregate data
     for category, country, female_patients, no_of_staff, death_2022, death_2023 in zip(category_list, country_list, female_list, staff_list, death22_list, death23_list):
         item = category + country
@@ -167,61 +174,48 @@ def validate_data(headers: list, values: list, file_dict: dict) -> bool:
 
     # Check for correct length of values as the header's
     if not len(values) == len(headers):
-        print('ERROR: Length')
         return False
     
     if 'country' in file_dict:
         cty = line.get('country')
         if all(cha.isdigit() for cha in cty):
-            print('ERROR: country')
             return False
         
     if 'hospital_category' in file_dict:
         cat = line.get('hospital_category')
         if all(cha.isdigit() for cha in cat):
-            print('ERROR: hospital_category')
             return False
 
     # Specific checks for hospital_id
     if 'hospital_id' in file_dict:
         hid = line.get('hospital_id')
         if not len(hid) == 15 or hid in file_dict['hospital_id']:
-            print('ERROR: hospital_id')
             return False
         
     # Check for no_of_staff
     if 'no_of_staff' in file_dict:
         sno = line.get('no_of_staff')
         if not sno.isdigit() or not int(sno) > 0:
-            print('ERROR: no_of_staff')
             return False
     
     # Check for no_of_patients, male_patients, female_patients
     if 'no_of_patients' in file_dict:
         pno = line['no_of_patients']
         if not pno.isdigit() or not int(pno) > 0:
-            print('ERROR: no_of_patients')
             return False
         if 'male_patients' in file_dict:
             mpno = line['male_patients']
             if not mpno.isdigit() or not int(mpno) > 0:
-                print('ERROR: no_of_patients')
                 return False
         if 'female_patients' in file_dict:
             fpno = line['female_patients']
             if not fpno.isdigit() or not int(fpno) > 0:
-                print('ERROR: no_of_patients')
-                return False
-        if 'male_patients' in file_dict and 'female_patients' in file_dict:
-            if not int(pno) >= int(fpno) + int(mpno):
-                print('ERROR: no_of_patients')
                 return False
     
     # Check for no_of_beds
     if 'no_of_beds' in file_dict:
         bno = line.get('no_of_beds')
         if not bno.isdigit() or not int(bno) > 0:
-            print('ERROR: no_of_beds')
             return False
     
     # Check for no_of_deaths_in_2022 and no_of_deaths_in_2023
@@ -229,7 +223,6 @@ def validate_data(headers: list, values: list, file_dict: dict) -> bool:
         dno22 = line['no_of_deaths_in_2022']
         dno23 = line['no_of_deaths_in_2023']
         if not dno22.isdigit() and not dno23.isdigit() and not (int(dno22) > 0 or int(dno23) > 0):
-            print('ERROR: no_of_deaths')
             return False
     
     # If there is no issues, returns True
@@ -249,8 +242,11 @@ def read_txt_into_dict(data_dict: dict, TXTfile: str) -> dict:
             data_dict[disease] = [0] * len(data_dict['hospital_id'])
         for line in open_file:
             # Create the dict for each line in TXT file
-            elements = line.lower().strip().split(', ')
-            element_dict = {header: value.strip() for header, value in (item.split(':') for item in elements)}
+            try:
+                elements = [item.split(':') for item in line.lower().strip().split(', ')]
+                element_dict = {header: value.strip() for header, value in elements}
+            except:
+                continue
             # Insert the TXT data into the main dict
             hid = element_dict['hospital_id']
             if hid in index_map:
@@ -267,7 +263,7 @@ def read_txt_into_dict(data_dict: dict, TXTfile: str) -> dict:
 # Cosine similarity
 def get_cosine(set_x: list, set_y: list) -> float:
     try:
-        # initialisation
+        # Initialisation
         numerator, denumerator = 0, 0
         denumerator1, denumerator2 = 0, 0
         set_len = len(set_x)
@@ -312,8 +308,8 @@ def get_pcad(ave_death_2022: int, ave_death_2023: int) -> int:
 '''Temp Test'''
 
 
-#OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Project2/hospital_data.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Project2/disease.txt', 'children')
-OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/hospital_data 11.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/disease 1.txt', 'children')
+OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/Project2/hospital_data.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/Project2/disease.txt', 'children')
+#OP1, OP2, OP3, OP4 = main('/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/hospital_data 8.csv', '/Users/vincent/Desktop/Python/CITS1401_Project/TEST2/disease 1.txt', 'children')
 
 print(OP1[0]['afghanistan']) #['4eb9d3e5cf79b91', 'bba52b87bb6a32f','8a9190a50adf241']
 print(OP1[1]['afghanistan']) #[20, 2, 12]
